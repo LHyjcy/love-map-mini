@@ -1,0 +1,447 @@
+// love-map-mini — Prisma schema (Phase 3)
+// MySQL + Prisma. MVP 核心数据模型：用户、情侣、地点、回忆、媒体、打卡、
+// 任务、积分、商城、兑换、日程、隐私授权、公开分享。
+//
+// 约定：
+// - 主键统一使用 cuid 字符串，避免暴露自增序号。
+// - 软删除使用 deletedAt（查询需过滤 deletedAt IS NULL）。
+// - 所有情侣资源带 coupleId，便于鉴权与越权校验。
+// - 经纬度用 Decimal(10,7)，约 1cm 精度，避免浮点误差。
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Gender {
+  unknown
+  male
+  female
+}
+
+enum CoupleStatus {
+  pending
+  active
+  unbound
+}
+
+enum PlaceType {
+  visited
+  wishlist
+  plan
+}
+
+enum Visibility {
+  private
+  couple
+  public
+}
+
+enum ShareScope {
+  self
+  partner
+  memory
+}
+
+enum TaskStatus {
+  pending
+  accepted
+  rejected
+  completed
+  confirmed
+  cancelled
+}
+
+enum PointSourceType {
+  checkin
+  task
+  memory
+  signin
+  manual
+  redeem
+}
+
+enum ShopItemStatus {
+  active
+  inactive
+}
+
+enum RedemptionStatus {
+  unused
+  used
+  cancelled
+}
+
+enum EventType {
+  anniversary
+  date
+  countdown
+  plan
+}
+
+enum ConsentType {
+  location
+  album
+  camera
+  public_share
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String    @id @default(cuid())
+  openid    String?   @unique
+  unionid   String?
+  nickname  String
+  avatarUrl String?
+  gender    Gender    @default(unknown)
+  birthday  DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couplesAsPartnerA Couple[]         @relation("CouplePartnerA")
+  couplesAsPartnerB Couple[]         @relation("CouplePartnerB")
+  placesCreated     Place[]          @relation("PlaceCreatedBy")
+  memoriesCreated   Memory[]         @relation("MemoryCreatedBy")
+  mediaUploaded     Media[]          @relation("MediaUploader")
+  checkins          Checkin[]
+  tasksCreated      Task[]           @relation("TaskCreator")
+  tasksAssigned     Task[]           @relation("TaskAssignee")
+  pointLedgers      PointLedger[]
+  shopItemsCreated  ShopItem[]       @relation("ShopItemCreator")
+  redemptions       Redemption[]     @relation("RedemptionBuyer")
+  eventsCreated     Event[]          @relation("EventCreator")
+  privacyConsents   PrivacyConsent[]
+  publicShares      PublicShare[]    @relation("PublicShareCreatedBy")
+
+  @@index([unionid])
+}
+
+model Couple {
+  id              String       @id @default(cuid())
+  userAId         String
+  userBId         String?
+  status          CoupleStatus @default(pending)
+  inviteCode      String       @unique
+  inviteExpiresAt DateTime?
+  togetherAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  userA User  @relation("CouplePartnerA", fields: [userAId], references: [id])
+  userB User? @relation("CouplePartnerB", fields: [userBId], references: [id])
+
+  places       Place[]
+  memories     Memory[]
+  media        Media[]
+  checkins     Checkin[]
+  tasks        Task[]
+  pointLedgers PointLedger[]
+  shopItems    ShopItem[]
+  redemptions  Redemption[]
+  events       Event[]
+  publicShares PublicShare[]
+
+  @@index([userAId])
+  @@index([userBId])
+  @@index([status])
+}
+
+model Place {
+  id          String @id @default(cuid())
+  coupleId    String
+  createdById String
+
+  title     String
+  address   String?
+  latitude  Decimal @db.Decimal(10, 7)
+  longitude Decimal @db.Decimal(10, 7)
+  city      String?
+  province  String?
+  country   String?
+  category  String?
+
+  placeType  PlaceType  @default(visited)
+  visibility Visibility @default(couple)
+
+  visitedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couple    Couple @relation(fields: [coupleId], references: [id])
+  createdBy User   @relation("PlaceCreatedBy", fields: [createdById], references: [id])
+
+  memories      Memory[]
+  checkins      Checkin[]
+  relatedTasks  Task[]    @relation("TaskRelatedPlace")
+  relatedEvents Event[]   @relation("EventRelatedPlace")
+
+  @@index([coupleId])
+  @@index([createdById])
+  @@index([coupleId, placeType])
+  @@index([coupleId, visibility])
+}
+
+model Memory {
+  id          String @id @default(cuid())
+  coupleId    String
+  placeId     String
+  createdById String
+
+  title      String
+  content    String?    @db.Text
+  mood       String?
+  memoryDate DateTime?
+  visibility Visibility @default(couple)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couple    Couple  @relation(fields: [coupleId], references: [id])
+  place     Place   @relation(fields: [placeId], references: [id])
+  createdBy User    @relation("MemoryCreatedBy", fields: [createdById], references: [id])
+  media     Media[]
+
+  @@index([coupleId])
+  @@index([placeId])
+  @@index([createdById])
+  @@index([coupleId, visibility])
+}
+
+model Media {
+  id         String @id @default(cuid())
+  coupleId   String
+  memoryId   String
+  uploaderId String
+
+  fileUrl   String
+  objectKey String
+  mimeType  String
+  width     Int?
+  height    Int?
+  size      Int?
+  sortOrder Int    @default(0)
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // relations
+  couple   Couple @relation(fields: [coupleId], references: [id])
+  memory   Memory @relation(fields: [memoryId], references: [id])
+  uploader User   @relation("MediaUploader", fields: [uploaderId], references: [id])
+
+  @@index([coupleId])
+  @@index([memoryId])
+  @@index([uploaderId])
+}
+
+model Checkin {
+  id       String  @id @default(cuid())
+  coupleId String
+  userId   String
+  placeId  String?
+
+  latitude  Decimal @db.Decimal(10, 7)
+  longitude Decimal @db.Decimal(10, 7)
+  address   String?
+  accuracy  Float?
+
+  shareScope ShareScope @default(self)
+  expiresAt  DateTime?
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // relations
+  couple Couple @relation(fields: [coupleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  place  Place? @relation(fields: [placeId], references: [id])
+
+  @@index([coupleId])
+  @@index([userId])
+  @@index([placeId])
+  // 查询 partner 最近一次有效共享位置
+  @@index([coupleId, shareScope, expiresAt])
+}
+
+model Task {
+  id         String @id @default(cuid())
+  coupleId   String
+  creatorId  String
+  assigneeId String
+
+  title          String
+  description    String?    @db.Text
+  points         Int        @default(0)
+  status         TaskStatus @default(pending)
+  dueAt          DateTime?
+  relatedPlaceId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couple       Couple @relation(fields: [coupleId], references: [id])
+  creator      User   @relation("TaskCreator", fields: [creatorId], references: [id])
+  assignee     User   @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  relatedPlace Place? @relation("TaskRelatedPlace", fields: [relatedPlaceId], references: [id])
+
+  @@index([coupleId])
+  @@index([creatorId])
+  @@index([assigneeId])
+  @@index([coupleId, status])
+}
+
+model PointLedger {
+  id       String @id @default(cuid())
+  coupleId String
+  userId   String
+
+  sourceType  PointSourceType
+  sourceId    String?
+  points      Int
+  description String?
+
+  createdAt DateTime @default(now())
+
+  // relations
+  couple Couple @relation(fields: [coupleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([coupleId])
+  @@index([userId])
+  @@index([coupleId, userId])
+  @@index([sourceType, sourceId])
+}
+
+model ShopItem {
+  id        String @id @default(cuid())
+  coupleId  String
+  creatorId String
+
+  title       String
+  description String?        @db.Text
+  pricePoints Int            @default(0)
+  stock       Int            @default(0)
+  status      ShopItemStatus @default(active)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couple      Couple       @relation(fields: [coupleId], references: [id])
+  creator     User         @relation("ShopItemCreator", fields: [creatorId], references: [id])
+  redemptions Redemption[]
+
+  @@index([coupleId])
+  @@index([creatorId])
+  @@index([coupleId, status])
+}
+
+model Redemption {
+  id       String @id @default(cuid())
+  coupleId String
+  itemId   String
+  buyerId  String
+
+  status RedemptionStatus @default(unused)
+  usedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  couple Couple   @relation(fields: [coupleId], references: [id])
+  item   ShopItem @relation(fields: [itemId], references: [id])
+  buyer  User     @relation("RedemptionBuyer", fields: [buyerId], references: [id])
+
+  @@index([coupleId])
+  @@index([itemId])
+  @@index([buyerId])
+  @@index([coupleId, status])
+}
+
+model Event {
+  id        String @id @default(cuid())
+  coupleId  String
+  creatorId String
+
+  title          String
+  eventType      EventType @default(date)
+  eventDate      DateTime
+  repeatRule     String?
+  relatedPlaceId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // relations
+  couple       Couple @relation(fields: [coupleId], references: [id])
+  creator      User   @relation("EventCreator", fields: [creatorId], references: [id])
+  relatedPlace Place? @relation("EventRelatedPlace", fields: [relatedPlaceId], references: [id])
+
+  @@index([coupleId])
+  @@index([creatorId])
+  @@index([coupleId, eventType])
+  @@index([coupleId, eventDate])
+}
+
+model PrivacyConsent {
+  id     String @id @default(cuid())
+  userId String
+
+  consentType ConsentType
+  version     String
+  agreedAt    DateTime?
+  revokedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  // relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([userId, consentType])
+}
+
+model PublicShare {
+  id          String @id @default(cuid())
+  coupleId    String
+  createdById String
+
+  shareCode  String    @unique
+  title      String
+  enabled    Boolean   @default(true)
+  disabledAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  // relations
+  couple    Couple @relation(fields: [coupleId], references: [id])
+  createdBy User   @relation("PublicShareCreatedBy", fields: [createdById], references: [id])
+
+  @@index([coupleId])
+  @@index([createdById])
+}

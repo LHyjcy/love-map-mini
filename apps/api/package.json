@@ -10,13 +10,18 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "fastify": "^4.28.1"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
+    "prisma": "^5.22.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"
   }
