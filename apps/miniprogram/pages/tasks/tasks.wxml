@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">任务状态流与积分（Phase 7 完善）</view>
+  </view>
+</view>

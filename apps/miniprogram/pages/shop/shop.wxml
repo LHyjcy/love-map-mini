@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">情侣商城与兑换背包（Phase 8 完善）</view>
+  </view>
+</view>

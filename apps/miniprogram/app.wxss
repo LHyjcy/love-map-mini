@@ -1,0 +1,31 @@
+/* app.wxss — 全局样式 */
+page {
+  background-color: #f5f4fb;
+  color: #2a2540;
+  font-size: 28rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+}
+
+.container {
+  padding: 32rpx;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(84, 68, 135, 0.06);
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #544487;
+  margin-bottom: 16rpx;
+}
+
+.muted {
+  color: #999999;
+  font-size: 26rpx;
+}

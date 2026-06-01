@@ -1,0 +1,16 @@
+{
+  "description": "love-map-mini WeChat mini program (Phase 1 skeleton).",
+  "appid": "touristappid",
+  "projectname": "love-map-mini",
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": false
+  },
+  "miniprogramRoot": "./",
+  "condition": {}
+}

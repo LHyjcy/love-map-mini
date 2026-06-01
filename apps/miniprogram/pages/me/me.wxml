@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">个人信息、隐私设置与公开地图开关（Phase 10 完善）</view>
+  </view>
+</view>

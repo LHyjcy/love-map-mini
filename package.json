@@ -1,0 +1,16 @@
+{
+  "name": "love-map-mini",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A WeChat mini program for couples: memory map + interaction system (tasks, points, shop, events). Original implementation inspired by mappedlove and qinglv.",
+  "workspaces": [
+    "apps/api",
+    "packages/shared"
+  ],
+  "scripts": {
+    "api:dev": "npm run dev --workspace apps/api",
+    "api:build": "npm run build --workspace apps/api",
+    "api:lint": "npm run lint --workspace apps/api"
+  },
+  "license": "UNLICENSED"
+}

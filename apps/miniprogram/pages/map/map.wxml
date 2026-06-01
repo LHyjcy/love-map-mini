@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">情侣地点地图与回忆 marker（Phase 5 完善）</view>
+  </view>
+</view>

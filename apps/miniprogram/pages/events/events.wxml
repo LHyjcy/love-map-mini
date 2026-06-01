@@ -1,0 +1,6 @@
+<view class="container">
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">纪念日、倒计时与约会计划（Phase 9 完善）</view>
+  </view>
+</view>

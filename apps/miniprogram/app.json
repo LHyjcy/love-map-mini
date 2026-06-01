@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/map/map",
+    "pages/tasks/tasks",
+    "pages/shop/shop",
+    "pages/events/events",
+    "pages/me/me"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#544487",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "love-map-mini",
+    "backgroundColor": "#f5f4fb"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#544487",
+    "backgroundColor": "#ffffff",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/map/map", "text": "地图" },
+      { "pagePath": "pages/tasks/tasks", "text": "任务" },
+      { "pagePath": "pages/shop/shop", "text": "商城" },
+      { "pagePath": "pages/events/events", "text": "日程" },
+      { "pagePath": "pages/me/me", "text": "我的" }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

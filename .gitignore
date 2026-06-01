@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Env / secrets — never commit real secrets
+.env
+.env.local
+*.local
+
+# Claude personal config
+.claude/settings.local.json
+
+# Prisma generated client
+apps/api/node_modules/.prisma/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# WeChat devtools
+apps/miniprogram/miniprogram_npm/
+
+# Reference projects — analyzed locally, never committed to this repo
+references/
