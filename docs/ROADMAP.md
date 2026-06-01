@@ -3,6 +3,17 @@
 按阶段推进，每个阶段单独执行、单独验证，每阶段完成后输出：新增/修改文件、运行命令、
 验证方式、已知限制、下一步建议。
 
+> Phase 2 参考项目分析已完成，见 [REFERENCE_ANALYSIS.md](REFERENCE_ANALYSIS.md)。
+> 数据模型与功能闭环的设计依据来自对 mappedlove（bond/marker/story、图片服务端上传、
+> 公开地图脱敏）与 qinglv（小程序页面结构、任务/商城/签到/打卡闭环、MySQL 表）的借鉴，
+> 但全部重写实现，并补齐密钥管理、鉴权越权校验、积分流水、事务与位置隐私默认值。
+
+## 进度
+
+- [x] Phase 1 — 项目骨架（已提交：`/health` 可用、小程序 6 页、docs 全套）
+- [x] Phase 2 — 参考项目分析（REFERENCE_ANALYSIS.md）
+- [ ] Phase 3 — 数据库 Schema（下一步）
+
 | Phase | 主题 | 关键产出 | 验收要点 |
 |---|---|---|---|
 | 1 | 项目初始化 | monorepo 骨架、Fastify `/health`、小程序 6 页骨架、docs | `npm run api:dev` 可起，`/health` 返回 ok；无业务 API、无密钥 |
