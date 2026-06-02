@@ -45,4 +45,14 @@ Page({
         wx.showToast({ title: err.message || '加载失败', icon: 'none' });
       });
   },
+
+  goAddPlace() {
+    wx.navigateTo({ url: '/pages/addPlace/addPlace' });
+  },
+  goCheckin() {
+    wx.navigateTo({ url: '/pages/checkin/checkin' });
+  },
+  goMemories() {
+    wx.navigateTo({ url: '/pages/memories/memories' });
+  },
 });

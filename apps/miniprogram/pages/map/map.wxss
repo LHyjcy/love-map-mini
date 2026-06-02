@@ -1,5 +1,30 @@
 /* pages/map/map.wxss */
+.map-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
 .map {
   width: 100%;
   height: 100vh;
+}
+
+.fab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 40rpx;
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  padding: 0 32rpx;
+}
+
+.fab {
+  margin-top: 0;
+  min-width: 150rpx;
+  line-height: 76rpx;
+  font-size: 28rpx;
+  box-shadow: 0 6rpx 18rpx rgba(84, 68, 135, 0.3);
 }

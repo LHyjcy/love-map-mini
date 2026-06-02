@@ -1,0 +1,12 @@
+.mem-picker {
+  margin-bottom: 16rpx;
+}
+
+.mem-content {
+  margin-top: 8rpx;
+}
+
+.list-item .input,
+.card .input {
+  margin-bottom: 16rpx;
+}

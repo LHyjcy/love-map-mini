@@ -5,7 +5,10 @@
     "pages/tasks/tasks",
     "pages/shop/shop",
     "pages/events/events",
-    "pages/me/me"
+    "pages/me/me",
+    "pages/addPlace/addPlace",
+    "pages/checkin/checkin",
+    "pages/memories/memories"
   ],
   "window": {
     "navigationBarBackgroundColor": "#544487",

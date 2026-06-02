@@ -1,8 +1,17 @@
-<map
-  class="map"
-  latitude="{{latitude}}"
-  longitude="{{longitude}}"
-  markers="{{markers}}"
-  scale="12"
-  show-location
-></map>
+<view class="map-page">
+  <map
+    class="map"
+    latitude="{{latitude}}"
+    longitude="{{longitude}}"
+    markers="{{markers}}"
+    scale="12"
+    show-location
+  ></map>
+
+  <!-- 悬浮入口 -->
+  <view class="fab-bar">
+    <button class="btn fab" bindtap="goAddPlace">＋ 地点</button>
+    <button class="btn fab ghost" bindtap="goCheckin">打卡</button>
+    <button class="btn fab ghost" bindtap="goMemories">回忆</button>
+  </view>
+</view>

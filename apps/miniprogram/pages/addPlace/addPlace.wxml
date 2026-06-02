@@ -1,0 +1,39 @@
+<view class="container">
+  <view class="card">
+    <view class="title">选择地点位置</view>
+    <map
+      class="map"
+      latitude="{{latitude}}"
+      longitude="{{longitude}}"
+      markers="{{markers}}"
+      scale="14"
+      show-location
+      bindtap="onMapTap"
+    ></map>
+    <view class="muted">已选坐标：{{latitude}}, {{longitude}}</view>
+    <button class="btn ghost" bindtap="useCurrentLocation">用当前位置</button>
+  </view>
+
+  <view class="card">
+    <view class="title">地点信息</view>
+
+    <view class="row">
+      <view class="label">标题</view>
+      <input class="input" placeholder="请输入地点标题" value="{{title}}" bindinput="onTitleInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">地址</view>
+      <input class="input" placeholder="可选" value="{{address}}" bindinput="onAddressInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">类型</view>
+      <picker mode="selector" range="{{typeLabels}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="value">{{typeLabels[typeIndex]}}</view>
+      </picker>
+    </view>
+
+    <button class="btn" bindtap="onSave">保存</button>
+  </view>
+</view>

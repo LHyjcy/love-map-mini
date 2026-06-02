@@ -1,0 +1,9 @@
+.map {
+  width: 100%;
+  height: 420rpx;
+  border-radius: 16rpx;
+}
+
+.map + .muted {
+  margin-top: 16rpx;
+}
