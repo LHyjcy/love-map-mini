@@ -1,6 +1,9 @@
 import { argv } from 'node:process';
 import { pathToFileURL } from 'node:url';
 import Fastify from 'fastify';
+import { registerAuth } from './plugins/auth.js';
+import { authRoutes } from './routes/auth.js';
+import { coupleRoutes } from './routes/couples.js';
 import { healthRoutes } from './routes/health.js';
 import { errorHandler } from './utils/errors.js';
 import { failure } from './utils/response.js';
@@ -22,8 +25,13 @@ export function buildServer() {
       .send(failure('NOT_FOUND', `Route ${request.method} ${request.url} not found`));
   });
 
-  // 路由注册（Phase 1 仅 health；业务路由在后续 Phase 加入）
+  // 鉴权能力（须在业务路由注册前，保证 app.authenticate 可用）
+  registerAuth(app);
+
+  // 路由注册
   app.register(healthRoutes);
+  app.register(authRoutes);
+  app.register(coupleRoutes);
 
   return app;
 }

@@ -13,7 +13,8 @@
 - [x] Phase 1 — 项目骨架（已提交：`/health` 可用、小程序 6 页、docs 全套）
 - [x] Phase 2 — 参考项目分析（REFERENCE_ANALYSIS.md）
 - [x] Phase 3 — 数据库 Schema（13 模型、11 枚举、初始迁移 SQL，client 生成通过）
-- [ ] Phase 4 — 认证与情侣绑定（下一步）
+- [x] Phase 4 — 认证与情侣绑定（JWT 鉴权、mock 登录、微信登录占位、邀请码绑定/解绑）
+- [ ] Phase 5 — 地图与回忆（下一步）
 
 | Phase | 主题 | 关键产出 | 验收要点 |
 |---|---|---|---|
