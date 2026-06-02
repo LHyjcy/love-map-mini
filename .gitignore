@@ -36,3 +36,6 @@ references/
 apps/api/prisma/demo.sqlite.prisma
 apps/api/prisma/*.db
 *.db
+
+# WeChat DevTools per-user private config
+apps/miniprogram/project.private.config.json
