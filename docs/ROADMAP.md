@@ -20,10 +20,12 @@
 - [x] Phase 8 — 商城与背包（Shop/Redemption、兑换/退回走事务、库存与积分一致）
 - [x] Phase 9 — 日程与首页（Event API、dashboard 聚合）
 - [x] Phase 10 — 隐私与公开地图（PrivacyConsent、PublicShare 骨架、默认关闭）
-- [ ] Phase 11 — 真实微信登录（下一步）
+- [x] Phase 11 — 真实微信登录（code2session，AppSecret 仅 env，session_key 不返前端，生产禁 mock）
+- [x] Phase 12 — 图片上传抽象（上传凭证、类型/大小限制；cos/oss 待接 SDK）
+- [x] Phase 13 — 审查与部署（REVIEW_REPORT、DEPLOYMENT 补全，API 文档同步）
 
-> Phase 5–10 后端路由全部一起 `tsc` 通过、服务启动无报错、未授权访问统一 401。
-> 数据路径需连 MySQL 才能端到端运行（开发环境暂无运行中的 MySQL）。
+> **MVP 13 阶段全部完成。** 后端路由全部一起 `tsc` 通过、服务启动无报错、未授权访问统一 401；
+> 安全/隐私审查见 REVIEW_REPORT.md。数据路径需连 MySQL 才能端到端运行。
 
 | Phase | 主题 | 关键产出 | 验收要点 |
 |---|---|---|---|

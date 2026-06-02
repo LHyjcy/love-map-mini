@@ -1,13 +1,14 @@
 /**
- * 认证路由：mock 登录（仅开发）、微信登录占位（Phase 11）、当前用户信息。
+ * 认证路由：mock 登录（仅开发）、微信登录（Phase 11）、当前用户信息。
  */
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { config } from '../config.js';
 import { prisma } from '../db.js';
 import { signToken } from '../plugins/auth.js';
+import { code2session } from '../services/wechat.js';
 import { AppError } from '../utils/errors.js';
-import { failure, success } from '../utils/response.js';
+import { success } from '../utils/response.js';
 import { parse } from '../utils/validation.js';
 
 const genderSchema = z.enum(['unknown', 'male', 'female']);
@@ -15,6 +16,13 @@ const genderSchema = z.enum(['unknown', 'male', 'female']);
 const mockLoginSchema = z.object({
   nickname: z.string().min(1).max(30),
   mockId: z.string().min(1).max(50),
+  avatarUrl: z.string().url().optional(),
+  gender: genderSchema.optional(),
+});
+
+const wechatLoginSchema = z.object({
+  code: z.string().min(1).max(200),
+  nickname: z.string().min(1).max(30).optional(),
   avatarUrl: z.string().url().optional(),
   gender: genderSchema.optional(),
 });
@@ -74,11 +82,33 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     return success({ token, user: toPublicUser(user) });
   });
 
-  // 微信登录占位：真实实现见 Phase 11，绝不在此读取/硬编码 AppSecret。
-  app.post('/api/auth/wechat-login', async (_request, reply) => {
-    return reply
-      .status(501)
-      .send(failure('NOT_IMPLEMENTED', 'WeChat login will be implemented in Phase 11.'));
+  // 微信登录：用 wx.login 的 code 换 openid，签发本服务 JWT。
+  // session_key 仅服务端临时使用，绝不返回前端、绝不入库可读字段。
+  app.post('/api/auth/wechat-login', async (request) => {
+    const { code, nickname, avatarUrl, gender } = parse(wechatLoginSchema, request.body);
+
+    // code2session 内部已校验是否配置（未配置抛 WECHAT_NOT_CONFIGURED/501）。
+    const session = await code2session(code);
+
+    const user = await prisma.user.upsert({
+      where: { openid: session.openid },
+      update: {
+        ...(session.unionid !== undefined ? { unionid: session.unionid } : {}),
+        ...(nickname !== undefined ? { nickname } : {}),
+        ...(avatarUrl !== undefined ? { avatarUrl } : {}),
+        ...(gender !== undefined ? { gender } : {}),
+      },
+      create: {
+        openid: session.openid,
+        unionid: session.unionid,
+        nickname: nickname ?? '微信用户',
+        avatarUrl,
+        gender: gender ?? 'unknown',
+      },
+    });
+
+    const token = signToken(app, { sub: user.id });
+    return success({ token, user: toPublicUser(user) });
   });
 
   // 当前登录用户信息。

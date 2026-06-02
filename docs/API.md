@@ -74,13 +74,21 @@
 
 ### POST /api/auth/wechat-login
 
-真实微信登录占位，将在 **Phase 11** 实现。当前返回：
+微信小程序登录（Phase 11）。客户端用 `wx.login` 拿到 `code` 后调用本接口。
+
+请求体：
 
 ```json
-{ "success": false, "error": { "code": "NOT_IMPLEMENTED", "message": "WeChat login will be implemented in Phase 11." } }
+{ "code": "<wx.login code>", "nickname": "小明", "avatarUrl": "https://...", "gender": "male" }
 ```
 
-状态码 `501`。**不涉及任何 AppSecret**。
+- `code` 必填；`nickname`/`avatarUrl`/`gender` 可选（首次登录的资料）。
+- 服务端用 `code2session` 换取 `openid`（按 `openid` upsert 用户），签发本服务 JWT。
+- **`AppSecret` 仅从环境变量读取，绝不返回前端；`session_key` 不返回前端、不入可读日志。**
+- 服务端未配置 `WECHAT_APP_ID/SECRET` 时返回 `501 WECHAT_NOT_CONFIGURED`；
+  微信侧失败返回 `401 WECHAT_<errcode>`；上游网络失败 `502 WECHAT_UPSTREAM_ERROR`。
+
+成功响应同 `mock-login`：`{ token, user }`。
 
 ### GET /api/me
 
@@ -178,9 +186,12 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
+| POST | `/api/media/upload-credential` | 签发图片上传凭证（mimeType 必填；限图片类型、≤10MB） |
 | POST | `/api/media` | 新建（memoryId、fileUrl、objectKey、mimeType 必填；须属于本情侣的 memory） |
 | GET | `/api/media?memoryId=...` | 某回忆的照片列表（按 sortOrder 升序） |
 | DELETE | `/api/media/:id` | 软删除 |
+
+**上传流程（Phase 12）**：客户端先 `POST /api/media/upload-credential` 拿 `{ provider, objectKey, fileUrl, uploadUrl, maxBytes, mimeType }`，直传对象存储后再用拿到的 `objectKey/fileUrl` 调 `POST /api/media` 保存元数据。`provider=local` 仅开发用（`uploadUrl=null`）；`cos/oss` 需引入厂商 SDK 后接线，未接线时返回 `501 STORAGE_PROVIDER_NOT_WIRED`。非图片类型返回 `415 UNSUPPORTED_MEDIA_TYPE`。**存储访问密钥仅服务端读取，绝不返回前端。**
 
 ## Checkins（位置打卡）
 

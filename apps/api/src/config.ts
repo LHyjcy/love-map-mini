@@ -30,4 +30,15 @@ export const config = {
   mockLoginEnabled: !isProduction,
   /** 邀请码有效期（毫秒），默认 24 小时。 */
   inviteTtlMs: 24 * 60 * 60 * 1000,
+
+  // 微信登录（Phase 11）。AppSecret 仅从环境变量读取，不写死、不返前端、不记日志。
+  wechatAppId: process.env.WECHAT_APP_ID ?? '',
+  wechatAppSecret: process.env.WECHAT_APP_SECRET ?? '',
+  wechatConfigured: Boolean(process.env.WECHAT_APP_ID && process.env.WECHAT_APP_SECRET),
+
+  // 对象存储（Phase 12）。密钥仅在 provider 内部按需读取，不进入此对象避免误打印。
+  storageProvider: (process.env.STORAGE_PROVIDER ?? 'local') as 'local' | 'cos' | 'oss',
+  storageBucket: process.env.STORAGE_BUCKET ?? '',
+  storageRegion: process.env.STORAGE_REGION ?? '',
+  storagePublicBaseUrl: process.env.STORAGE_PUBLIC_BASE_URL ?? '',
 } as const;

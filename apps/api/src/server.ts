@@ -16,6 +16,7 @@ import { privacyRoutes } from './routes/privacy.js';
 import { publicShareRoutes } from './routes/publicShare.js';
 import { shopRoutes } from './routes/shop.js';
 import { taskRoutes } from './routes/tasks.js';
+import { uploadRoutes } from './routes/uploads.js';
 import { errorHandler } from './utils/errors.js';
 import { failure } from './utils/response.js';
 
@@ -46,6 +47,7 @@ export function buildServer() {
   app.register(placeRoutes);
   app.register(memoryRoutes);
   app.register(mediaRoutes);
+  app.register(uploadRoutes);
   app.register(checkinRoutes);
   app.register(taskRoutes);
   app.register(pointRoutes);
