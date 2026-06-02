@@ -14,7 +14,16 @@
 - [x] Phase 2 — 参考项目分析（REFERENCE_ANALYSIS.md）
 - [x] Phase 3 — 数据库 Schema（13 模型、11 枚举、初始迁移 SQL，client 生成通过）
 - [x] Phase 4 — 认证与情侣绑定（JWT 鉴权、mock 登录、微信登录占位、邀请码绑定/解绑）
-- [ ] Phase 5 — 地图与回忆（下一步）
+- [x] Phase 5 — 地图与回忆（Place/Memory/Media API、小程序地图标记 + me 页登录绑定）
+- [x] Phase 6 — 位置打卡（Checkin API、临时共享、伴侣最近有效位置 + 距离、无后台定位）
+- [x] Phase 7 — 任务与积分（任务状态机、积分流水、每日签到、事务发分一次）
+- [x] Phase 8 — 商城与背包（Shop/Redemption、兑换/退回走事务、库存与积分一致）
+- [x] Phase 9 — 日程与首页（Event API、dashboard 聚合）
+- [x] Phase 10 — 隐私与公开地图（PrivacyConsent、PublicShare 骨架、默认关闭）
+- [ ] Phase 11 — 真实微信登录（下一步）
+
+> Phase 5–10 后端路由全部一起 `tsc` 通过、服务启动无报错、未授权访问统一 401。
+> 数据路径需连 MySQL 才能端到端运行（开发环境暂无运行中的 MySQL）。
 
 | Phase | 主题 | 关键产出 | 验收要点 |
 |---|---|---|---|

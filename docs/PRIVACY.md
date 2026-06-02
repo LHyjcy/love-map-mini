@@ -31,4 +31,25 @@
 - 用户/伴侣对外仅暴露最小字段（id、昵称、头像、性别），不返回 openid/unionid。
 - 邀请码为 6 位数字、24 小时过期、绑定后失效，降低被猜测/复用风险。
 
-> 具体的授权记录（PrivacyConsent）与公开地图脱敏逻辑在 Phase 10 实现，本文件届时补全。
+## 位置打卡与共享（Phase 6）
+
+- 打卡（`POST /api/checkins`）**仅用户主动发起**，服务端不做任何后台/持续定位。
+- 打卡 `shareScope` 默认 `self`（仅本人可见）。只有显式选择 `partner`/`memory` 才可能被伴侣看到。
+- 临时共享可设 `shareTtlMinutes` → `expiresAt`；`GET /api/checkins/partner-latest` 只返回
+  伴侣 `shareScope ∈ {partner, memory}` **且未过期**的最近一条，过期即不可见。
+- 打卡可软删除（`DELETE /api/checkins/:id`），删除后不再参与任何查询。
+
+## 隐私授权记录（Phase 10）
+
+- `PrivacyConsent` 按用户记录 `location/album/camera/public_share` 的同意与撤销，**追加写**、
+  可审计，不就地修改历史。
+
+## 公开地图（Phase 10，骨架）
+
+- 公开分享**默认关闭**。`POST /api/public-shares` 仅创建开关记录与 `shareCode`，
+  **当前不输出任何坐标或地图内容**。
+- 公开内容渲染与坐标脱敏（家/学校/工作精确坐标不外泄、保留低精度）将在公开页落地时实现，
+  默认仅 `visibility=public` 的数据可进入公开范围。
+
+> 真实微信登录（Phase 11）与对象存储签名上传（Phase 12）落地后，本文件再补充
+> `session_key` 不返前端、上传密钥不进前端等条款。

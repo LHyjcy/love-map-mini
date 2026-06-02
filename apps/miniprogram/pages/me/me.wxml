@@ -1,6 +1,57 @@
 <view class="container">
-  <view class="card">
-    <view class="title">{{title}}</view>
-    <view class="muted">个人信息、隐私设置与公开地图开关（Phase 10 完善）</view>
+  <!-- 未登录 -->
+  <view class="card" wx:if="{{!user}}">
+    <view class="title">我的</view>
+    <view class="muted">登录后即可绑定情侣、记录回忆地点。</view>
+    <button class="btn primary" bindtap="mockLogin">体验登录</button>
+  </view>
+
+  <!-- 已登录：账号信息 -->
+  <view class="card" wx:if="{{user}}">
+    <view class="title">账号</view>
+    <view class="row">
+      <text class="label">昵称</text>
+      <text class="value">{{user.nickname}}</text>
+    </view>
+    <button class="btn ghost" bindtap="logout">退出登录</button>
+  </view>
+
+  <!-- 已登录：情侣绑定 -->
+  <view class="card" wx:if="{{user}}">
+    <view class="title">情侣绑定</view>
+
+    <!-- 已绑定 -->
+    <block wx:if="{{couple}}">
+      <view class="row">
+        <text class="label">伴侣</text>
+        <text class="value">{{partner.nickname || '已绑定'}}</text>
+      </view>
+      <view class="row">
+        <text class="label">状态</text>
+        <text class="value">{{couple.status}}</text>
+      </view>
+      <button class="btn ghost" bindtap="unbind">解除绑定</button>
+    </block>
+
+    <!-- 未绑定 -->
+    <block wx:else>
+      <view class="muted">生成邀请码发给对方，或输入对方的邀请码完成绑定。</view>
+
+      <button class="btn primary" bindtap="genInvite">生成邀请码</button>
+      <view class="code-box" wx:if="{{inviteCode}}">
+        <text class="label">我的邀请码</text>
+        <text class="code">{{inviteCode}}</text>
+      </view>
+
+      <view class="divider"></view>
+
+      <input
+        class="input"
+        placeholder="输入对方的邀请码"
+        value="{{acceptCode}}"
+        bindinput="onAcceptInput"
+      />
+      <button class="btn primary" bindtap="acceptInvite">绑定</button>
+    </block>
   </view>
 </view>

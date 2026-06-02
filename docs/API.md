@@ -137,5 +137,135 @@
 
 ---
 
-> 其余业务接口（Place / Memory / Checkin / Task / Point / Shop / Event / Privacy /
-> PublicShare）将在 Phase 5 起逐步补充。
+---
+
+# Phase 5–10 业务接口
+
+> 以下接口**全部需鉴权**（`Authorization: Bearer <token>`），并要求当前用户已绑定情侣
+> （否则 `404 NO_ACTIVE_COUPLE`）。所有查询按 `coupleId` 隔离；不属于本情侣或已软删除的
+> 资源一律返回 `404 NOT_FOUND`。经纬度在响应中转为数字。
+
+## Places（地点）
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/places` | 新建地点（title、latitude、longitude 必填；placeType/visibility 可选） |
+| GET | `/api/places` | 列表，可选 `?placeType=` |
+| GET | `/api/places/markers` | 地图标记轻量列表 `{id,title,latitude,longitude,placeType}` |
+| GET | `/api/places/:id` | 详情 |
+| PATCH | `/api/places/:id` | 更新 |
+| DELETE | `/api/places/:id` | 软删除 |
+
+```json
+{ "success": true, "data": { "place": { "id": "...", "title": "初遇咖啡", "latitude": 31.2304, "longitude": 121.4737, "placeType": "visited", "visibility": "couple" } } }
+```
+
+## Memories（回忆）
+
+关联某个 Place（`placeId` 必填，且须属于本情侣，否则 `404 PLACE_NOT_FOUND`）。列表/详情内联未删除的 `media`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/memories` | 新建（placeId、title 必填） |
+| GET | `/api/memories` | 列表，可选 `?placeId=` |
+| GET | `/api/memories/:id` | 详情（含 media） |
+| PATCH | `/api/memories/:id` | 更新 title/content/mood/memoryDate/visibility |
+| DELETE | `/api/memories/:id` | 软删除 |
+
+## Media（照片元数据）
+
+> 真实签名上传见 Phase 12；此处仅保存客户端已上传后得到的 `fileUrl`/`objectKey` 元数据。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/media` | 新建（memoryId、fileUrl、objectKey、mimeType 必填；须属于本情侣的 memory） |
+| GET | `/api/media?memoryId=...` | 某回忆的照片列表（按 sortOrder 升序） |
+| DELETE | `/api/media/:id` | 软删除 |
+
+## Checkins（位置打卡）
+
+> **隐私默认**：不做后台定位、仅用户主动打卡；`shareScope` 默认 `self`。伴侣位置仅在打卡
+> `shareScope` 为 `partner`/`memory` 且未过期时可见。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/checkins` | 打卡（latitude/longitude 必填；shareScope 默认 self；shareTtlMinutes 决定 expiresAt） |
+| GET | `/api/checkins` | 我自己的打卡（倒序，≤50） |
+| GET | `/api/checkins/partner-latest` | 伴侣最近一次**有效共享**位置 + 直线距离（米）；无则均为 null |
+| DELETE | `/api/checkins/:id` | 软删除自己的打卡 |
+
+```json
+{ "success": true, "data": { "checkin": { "id": "...", "shareScope": "partner", "expiresAt": "<ISO>" }, "distanceMeters": 1234.56 } }
+```
+
+## Tasks（任务）
+
+状态机：`pending →(assignee accept)→ accepted →(assignee complete)→ completed →(creator confirm)→ confirmed`；
+`pending →(assignee reject)→ rejected`；`pending|accepted →(creator cancel)→ cancelled`。
+错误人物 `403 FORBIDDEN`，非法流转 `409 INVALID_TASK_TRANSITION`。`confirm` 时在**事务**内给
+assignee 记一次任务积分（points>0），凭流转保证只发一次。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/tasks` | 新建（title、assigneeId=伴侣；points 可选） |
+| GET | `/api/tasks` | 列表，可选 `?status=` |
+| GET | `/api/tasks/:id` | 详情 |
+| POST | `/api/tasks/:id/accept` `/reject` `/complete` `/confirm` `/cancel` | 状态流转 |
+
+## Points & Sign-in（积分与签到）
+
+余额 = 不可变 `PointLedger` 流水求和；不直接改用户字段。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/points/balance` | 当前余额 |
+| GET | `/api/points/ledger` | 我的流水（倒序，≤100） |
+| POST | `/api/points/signin` | 每日签到（+5，每日仅一次，否则 `409 ALREADY_SIGNED_IN_TODAY`） |
+
+## Shop & Redemption（商城与背包）
+
+兑换/退回均走 `prisma.$transaction`，保证库存、积分、兑换状态一致。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST/GET/PATCH/DELETE | `/api/shop/items[/:id]` | 商品 CRUD（软删除） |
+| POST | `/api/shop/items/:id/redeem` | 兑换：校验库存>0、余额≥价格；扣库存、记负分、生成 unused 兑换 |
+| GET | `/api/shop/redemptions` | 我的背包 |
+| POST | `/api/shop/redemptions/:id/use` | 标记已用（unused→used） |
+| POST | `/api/shop/redemptions/:id/cancel` | 取消并退分、回补库存（unused→cancelled） |
+
+兑换错误：`404 ITEM_UNAVAILABLE`、`409 OUT_OF_STOCK`、`409 INSUFFICIENT_POINTS`。
+
+## Events（日程/纪念日）
+
+`daysUntil` 以今天 00:00（本地）为基准，负数表示已过。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST/GET/PATCH/DELETE | `/api/events[/:id]` | 事件 CRUD（软删除）；列表按 eventDate 升序，可选 `?eventType=` |
+
+## Dashboard（首页聚合）
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/dashboard` | `daysTogether`、`pointsBalance`、`recentMemories`(5)、`pendingTasks`(计数)、`upcomingEvents`(5) |
+
+## Privacy Consents（隐私授权，按用户）
+
+`PrivacyConsent` 仅按 `userId` 隔离（与情侣无关），**追加写**，每次同意/撤销新增一行。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/privacy/consents` | 我的授权记录（倒序） |
+| POST | `/api/privacy/consents` | 记录授权/撤销（consentType、version、agreed） |
+
+## Public Share（公开分享骨架）
+
+> **骨架**：仅维护分享开关与唯一 `shareCode`，**不暴露任何坐标**。公开地图内容与坐标脱敏
+> （家/学校/工作不外泄）在 **Phase 10** 实现；产品层默认关闭。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/public-shares` | 创建分享记录（title；shareCode 12 位 hex，冲突重试） |
+| GET | `/api/public-shares` | 列表 |
+| POST | `/api/public-shares/:id/disable` `/enable` | 关闭/开启 |

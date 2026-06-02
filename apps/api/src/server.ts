@@ -3,8 +3,19 @@ import { pathToFileURL } from 'node:url';
 import Fastify from 'fastify';
 import { registerAuth } from './plugins/auth.js';
 import { authRoutes } from './routes/auth.js';
+import { checkinRoutes } from './routes/checkins.js';
 import { coupleRoutes } from './routes/couples.js';
+import { dashboardRoutes } from './routes/dashboard.js';
+import { eventRoutes } from './routes/events.js';
 import { healthRoutes } from './routes/health.js';
+import { mediaRoutes } from './routes/media.js';
+import { memoryRoutes } from './routes/memories.js';
+import { placeRoutes } from './routes/places.js';
+import { pointRoutes } from './routes/points.js';
+import { privacyRoutes } from './routes/privacy.js';
+import { publicShareRoutes } from './routes/publicShare.js';
+import { shopRoutes } from './routes/shop.js';
+import { taskRoutes } from './routes/tasks.js';
 import { errorHandler } from './utils/errors.js';
 import { failure } from './utils/response.js';
 
@@ -32,6 +43,17 @@ export function buildServer() {
   app.register(healthRoutes);
   app.register(authRoutes);
   app.register(coupleRoutes);
+  app.register(placeRoutes);
+  app.register(memoryRoutes);
+  app.register(mediaRoutes);
+  app.register(checkinRoutes);
+  app.register(taskRoutes);
+  app.register(pointRoutes);
+  app.register(shopRoutes);
+  app.register(eventRoutes);
+  app.register(dashboardRoutes);
+  app.register(privacyRoutes);
+  app.register(publicShareRoutes);
 
   return app;
 }

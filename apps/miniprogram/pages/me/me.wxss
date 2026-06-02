@@ -1,1 +1,65 @@
 /* pages/me/me.wxss */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+}
+
+.label {
+  color: #999999;
+  font-size: 26rpx;
+}
+
+.value {
+  color: #2a2540;
+  font-size: 28rpx;
+}
+
+.btn {
+  margin-top: 24rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 2.6;
+}
+
+.btn.primary {
+  background: #544487;
+  color: #ffffff;
+}
+
+.btn.ghost {
+  background: #f5f4fb;
+  color: #544487;
+}
+
+.input {
+  margin-top: 24rpx;
+  padding: 20rpx 24rpx;
+  background: #f5f4fb;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+.code-box {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  background: #f5f4fb;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.code {
+  margin-top: 8rpx;
+  font-size: 40rpx;
+  font-weight: 600;
+  letter-spacing: 4rpx;
+  color: #544487;
+}
+
+.divider {
+  height: 1rpx;
+  background: #eeecf6;
+  margin: 32rpx 0 8rpx;
+}
