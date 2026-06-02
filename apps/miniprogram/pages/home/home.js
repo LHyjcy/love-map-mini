@@ -60,6 +60,7 @@ Page({
   },
 
   goEvents() {
-    wx.switchTab({ url: '/pages/events/events' });
+    // 日程不在 tabBar 中，用 navigateTo 进入
+    wx.navigateTo({ url: '/pages/events/events' });
   },
 });

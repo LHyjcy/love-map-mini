@@ -22,7 +22,6 @@
       { "pagePath": "pages/map/map", "text": "地图" },
       { "pagePath": "pages/tasks/tasks", "text": "任务" },
       { "pagePath": "pages/shop/shop", "text": "商城" },
-      { "pagePath": "pages/events/events", "text": "日程" },
       { "pagePath": "pages/me/me", "text": "我的" }
     ]
   },
