@@ -1,6 +1,60 @@
 <view class="container">
-  <view class="card">
-    <view class="title">{{title}}</view>
-    <view class="muted">在一起天数、积分、最近回忆/任务/日程与快捷入口（Phase 9 完善）</view>
+  <!-- 未登录 -->
+  <view wx:if="{{!loading && !loggedIn}}" class="card center">
+    <view class="title">欢迎来到 love-map-mini</view>
+    <view class="muted">记录你们一起去过的地方与点滴</view>
+    <button class="btn" bindtap="goMe">去登录</button>
   </view>
+
+  <!-- 已登录未绑定 -->
+  <view wx:if="{{!loading && loggedIn && !bound}}" class="card center">
+    <view class="title">还没有绑定另一半</view>
+    <view class="muted">生成或输入邀请码完成绑定后即可使用</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <!-- 已绑定：dashboard -->
+  <block wx:if="{{!loading && bound && dash}}">
+    <view class="hero">
+      <view class="hero-num">{{dash.daysTogether === null ? '—' : dash.daysTogether}}</view>
+      <view class="hero-label">在一起的日子</view>
+    </view>
+
+    <view class="row">
+      <view class="stat card">
+        <view class="stat-num">{{dash.pointsBalance}}</view>
+        <view class="muted">我的积分</view>
+      </view>
+      <view class="stat card">
+        <view class="stat-num">{{dash.pendingTasks}}</view>
+        <view class="muted">待办任务</view>
+      </view>
+    </view>
+
+    <button class="btn block" bindtap="signin">每日签到 +5</button>
+
+    <view class="card">
+      <view class="title">即将到来</view>
+      <view wx:if="{{dash.upcomingEvents.length === 0}}" class="muted">暂无日程</view>
+      <view wx:for="{{dash.upcomingEvents}}" wx:key="id" class="line" bindtap="goEvents">
+        <text>{{item.title}}</text>
+        <text class="badge">{{item.daysUntil === 0 ? '今天' : item.daysUntil + ' 天后'}}</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title">最近回忆</view>
+      <view wx:if="{{dash.recentMemories.length === 0}}" class="muted">还没有回忆，去地图添加吧</view>
+      <view wx:for="{{dash.recentMemories}}" wx:key="id" class="line" bindtap="goMap">
+        <text>{{item.title}}</text>
+      </view>
+    </view>
+
+    <view class="row">
+      <button class="btn ghost" bindtap="goMap">地图</button>
+      <button class="btn ghost" bindtap="goTasks">任务</button>
+    </view>
+  </block>
+
+  <view wx:if="{{loading}}" class="card center muted">加载中…</view>
 </view>
