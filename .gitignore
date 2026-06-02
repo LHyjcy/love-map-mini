@@ -31,3 +31,8 @@ apps/miniprogram/miniprogram_npm/
 
 # Reference projects — analyzed locally, never committed to this repo
 references/
+
+# Phase 13 本地演示产物（SQLite）
+apps/api/prisma/demo.sqlite.prisma
+apps/api/prisma/*.db
+*.db
