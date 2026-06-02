@@ -50,10 +50,19 @@ Page({
       });
   },
 
-  // 体验登录（mock）
+  // 体验登录（mock，每次新建一个用户）
   mockLogin() {
+    this.doMockLogin('体验用户', 'u-' + Date.now());
+  },
+
+  // 演示账号：登录到已绑定、已有数据的本地演示账号（mockId=alice）
+  demoLogin() {
+    this.doMockLogin('Alice', 'alice');
+  },
+
+  doMockLogin(nickname, mockId) {
     api
-      .post('/api/auth/mock-login', { nickname: '体验用户', mockId: 'u-' + Date.now() })
+      .post('/api/auth/mock-login', { nickname, mockId })
       .then((data) => {
         api.setToken((data && data.token) || '');
         this.setData({ user: (data && data.user) || null });

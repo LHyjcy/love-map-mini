@@ -3,7 +3,8 @@
   <view class="card" wx:if="{{!user}}">
     <view class="title">我的</view>
     <view class="muted">登录后即可绑定情侣、记录回忆地点。</view>
-    <button class="btn primary" bindtap="mockLogin">体验登录</button>
+    <button class="btn primary" bindtap="demoLogin">演示账号（已绑定·有数据）</button>
+    <button class="btn ghost" bindtap="mockLogin">体验登录（新建账号）</button>
   </view>
 
   <!-- 已登录：账号信息 -->
