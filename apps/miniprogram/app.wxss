@@ -29,3 +29,89 @@ page {
   color: #999999;
   font-size: 26rpx;
 }
+
+/* ---- 共享 UI 组件类（各页面通用） ---- */
+.btn {
+  margin-top: 24rpx;
+  background: #544487;
+  color: #ffffff;
+  border-radius: 999rpx;
+  font-size: 30rpx;
+}
+
+.btn.ghost {
+  background: #ffffff;
+  color: #544487;
+  border: 1rpx solid #d9d3f0;
+}
+
+.btn.mini {
+  display: inline-block;
+  margin: 0 0 0 16rpx;
+  padding: 0 28rpx;
+  line-height: 60rpx;
+  font-size: 26rpx;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.label {
+  color: #6b6580;
+}
+
+.value {
+  color: #2a2540;
+  font-weight: 500;
+}
+
+.badge {
+  font-size: 24rpx;
+  color: #544487;
+  background: #efecfa;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+}
+
+.badge.green {
+  color: #1f9d63;
+  background: #e6f6ee;
+}
+
+.badge.gray {
+  color: #999999;
+  background: #f0f0f4;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16rpx;
+  padding: 18rpx 24rpx;
+  background: #f5f4fb;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+}
+
+.divider {
+  height: 1rpx;
+  background: #f0eef8;
+  margin: 24rpx 0;
+}
+
+.list-item {
+  padding: 22rpx 0;
+  border-top: 1rpx solid #f0eef8;
+}
+
+.list-item:first-child {
+  border-top: none;
+}

@@ -1,1 +1,13 @@
 /* pages/events/events.wxss */
+.center {
+  text-align: center;
+}
+
+.picker-box {
+  margin-top: 16rpx;
+  padding: 18rpx 24rpx;
+  background: #f5f4fb;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+  color: #2a2540;
+}

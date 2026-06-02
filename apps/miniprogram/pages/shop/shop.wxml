@@ -1,6 +1,75 @@
 <view class="container">
-  <view class="card">
-    <view class="title">{{title}}</view>
-    <view class="muted">情侣商城与兑换背包（Phase 8 完善）</view>
+  <!-- 未登录 / 未绑定 -->
+  <view wx:if="{{ready && !loggedIn}}" class="card center">
+    <view class="title">商城</view>
+    <view class="muted">登录并绑定后即可上架心愿、用积分兑换。</view>
+    <button class="btn" bindtap="goMe">去『我的』登录</button>
   </view>
+  <view wx:elif="{{ready && !bound}}" class="card center">
+    <view class="title">商城</view>
+    <view class="muted">先绑定情侣，才能共享商城与背包。</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <block wx:if="{{ready && bound}}">
+    <view class="card">
+      <view class="row">
+        <text class="title" style="margin:0">我的积分</text>
+        <text class="badge green">{{balance}} 分</text>
+      </view>
+    </view>
+
+    <!-- 分段切换 -->
+    <view class="seg">
+      <text class="seg-item {{tab==='shop' ? 'active' : ''}}" data-tab="shop" bindtap="switchTab">商品</text>
+      <text class="seg-item {{tab==='bag' ? 'active' : ''}}" data-tab="bag" bindtap="switchTab">背包</text>
+    </view>
+
+    <!-- 商品 -->
+    <block wx:if="{{tab==='shop'}}">
+      <view class="card">
+        <view class="title">上架心愿</view>
+        <input class="input" placeholder="商品名称，如：一次按摩" value="{{form.title}}" bindinput="onTitle" />
+        <input class="input" type="number" placeholder="所需积分" value="{{form.pricePoints}}" bindinput="onPrice" />
+        <input class="input" type="number" placeholder="库存数量" value="{{form.stock}}" bindinput="onStock" />
+        <button class="btn" bindtap="createItem">上架</button>
+      </view>
+
+      <view class="card">
+        <view class="title">商品列表</view>
+        <view wx:if="{{items.length === 0}}" class="muted">还没有商品</view>
+        <view wx:for="{{items}}" wx:key="id" class="list-item">
+          <view class="row">
+            <text class="value">{{item.title}}</text>
+            <text class="badge">{{item.pricePoints}} 分</text>
+          </view>
+          <view class="row">
+            <text class="muted">库存 {{item.stock}} · {{item.status==='active' ? '在售' : '已下架'}}</text>
+            <button class="btn mini" disabled="{{!item.canRedeem}}" data-id="{{item.id}}" bindtap="redeem">兑换</button>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 背包 -->
+    <block wx:if="{{tab==='bag'}}">
+      <view class="card">
+        <view class="title">我的背包</view>
+        <view wx:if="{{redemptions.length === 0}}" class="muted">背包是空的，去兑换吧</view>
+        <view wx:for="{{redemptions}}" wx:key="id" class="list-item">
+          <view class="row">
+            <text class="value">兑换 #{{item.id}}</text>
+            <text class="badge {{item.badgeClass}}">{{item.statusText}}</text>
+          </view>
+          <view wx:if="{{item.status==='unused'}}" class="row">
+            <text class="muted">未使用</text>
+            <view>
+              <button class="btn mini" data-id="{{item.id}}" bindtap="useRdm">核销</button>
+              <button class="btn mini ghost" data-id="{{item.id}}" bindtap="cancelRdm">退回</button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+  </block>
 </view>

@@ -1,6 +1,42 @@
 <view class="container">
-  <view class="card">
-    <view class="title">{{title}}</view>
-    <view class="muted">纪念日、倒计时与约会计划（Phase 9 完善）</view>
+  <!-- 未登录 / 未绑定 -->
+  <view wx:if="{{ready && !loggedIn}}" class="card center">
+    <view class="title">日程</view>
+    <view class="muted">登录并绑定后即可记录纪念日与倒数。</view>
+    <button class="btn" bindtap="goMe">去『我的』登录</button>
   </view>
+  <view wx:elif="{{ready && !bound}}" class="card center">
+    <view class="title">日程</view>
+    <view class="muted">先绑定情侣，才能共享纪念日。</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <block wx:if="{{ready && bound}}">
+    <view class="card">
+      <view class="title">添加日程</view>
+      <input class="input" placeholder="标题，如：在一起纪念日" value="{{form.title}}" bindinput="onTitle" />
+      <picker class="picker" mode="selector" range="{{typeLabels}}" value="{{form.typeIndex}}" bindchange="onType">
+        <view class="picker-box">类型：{{typeLabels[form.typeIndex]}}</view>
+      </picker>
+      <picker class="picker" mode="date" value="{{form.eventDate}}" bindchange="onDate">
+        <view class="picker-box">日期：{{form.eventDate || '请选择'}}</view>
+      </picker>
+      <button class="btn" bindtap="createEvent">添加</button>
+    </view>
+
+    <view class="card">
+      <view class="title">日程列表</view>
+      <view wx:if="{{events.length === 0}}" class="muted">还没有日程</view>
+      <view wx:for="{{events}}" wx:key="id" class="list-item">
+        <view class="row">
+          <text class="value">{{item.title}}</text>
+          <text class="badge {{item.badgeClass}}">{{item.countdown}}</text>
+        </view>
+        <view class="row">
+          <text class="muted">{{item.typeLabel}} · {{item.dateText}}</text>
+          <button class="btn mini ghost" data-id="{{item.id}}" bindtap="delEvent">删除</button>
+        </view>
+      </view>
+    </view>
+  </block>
 </view>
