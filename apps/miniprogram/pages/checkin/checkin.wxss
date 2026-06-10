@@ -18,3 +18,8 @@
 .card .btn {
   margin-top: 16rpx;
 }
+
+.co-checkin {
+  border: 1rpx solid #ff7aa2;
+  background: #fff0f4;
+}

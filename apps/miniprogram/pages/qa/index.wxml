@@ -1,0 +1,58 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{!ready}}" class="card center">
+    <view class="muted">加载中…</view>
+  </view>
+
+  <!-- 未登录 / 未绑定 -->
+  <view wx:if="{{ready && !loggedIn}}" class="card center">
+    <view class="title">情侣问答</view>
+    <view class="muted">登录并绑定后，每天和 TA 回答同一个问题。</view>
+    <button class="btn" bindtap="goMe">去『我的』登录</button>
+  </view>
+  <view wx:elif="{{ready && !bound}}" class="card center">
+    <view class="title">情侣问答</view>
+    <view class="muted">先绑定情侣，才能一起回答今日问题。</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <block wx:if="{{ready && bound}}">
+    <!-- 今日问题 -->
+    <view class="card">
+      <view class="title">今日问题</view>
+      <view wx:if="{{question}}" class="question">{{question.text}}</view>
+      <view wx:else class="muted">今天还没有问题，稍后再来看看～</view>
+    </view>
+
+    <block wx:if="{{question}}">
+      <!-- 我还没回答 -->
+      <view wx:if="{{!mineAnswer}}" class="card">
+        <view class="title">写下你的回答</view>
+        <textarea
+          class="textarea"
+          placeholder="说说你的想法吧…（最多 500 字）"
+          maxlength="500"
+          value="{{draft}}"
+          bindinput="onDraft"
+        ></textarea>
+        <button class="btn" bindtap="submitAnswer" disabled="{{submitting}}" loading="{{submitting}}">提交回答</button>
+      </view>
+
+      <!-- 我已回答，但未互看 -->
+      <view wx:elif="{{!revealed}}" class="card">
+        <view class="title">你的回答</view>
+        <view class="answer-block mine">{{mineAnswer}}</view>
+        <view class="hint">{{hint}}</view>
+      </view>
+
+      <!-- 双方都已回答，可互看 -->
+      <view wx:else class="card">
+        <view class="title">你们的回答</view>
+        <view class="answer-label">我的</view>
+        <view class="answer-block mine">{{answers.mine}}</view>
+        <view class="answer-label">TA 的</view>
+        <view class="answer-block partner">{{answers.partner}}</view>
+      </view>
+    </block>
+  </block>
+</view>

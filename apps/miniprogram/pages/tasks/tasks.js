@@ -10,6 +10,15 @@ const STATUS_TEXT = {
   cancelled: '已取消',
 };
 
+// 快捷任务模板：点一下即可填入创建表单
+const TEMPLATES = [
+  { title: '夸夸对方', points: 5 },
+  { title: '一起合照', points: 10 },
+  { title: '准备一次约会', points: 20 },
+  { title: '手写一封信', points: 15 },
+  { title: '一起打卡新地点', points: 10 },
+];
+
 Page({
   data: {
     ready: false,
@@ -18,6 +27,7 @@ Page({
     myId: '',
     partner: null,
     tasks: [],
+    templates: TEMPLATES,
     form: { title: '', points: '' },
   },
 
@@ -30,33 +40,44 @@ Page({
     this.load();
   },
 
+  onPullDownRefresh() {
+    if (!api.getToken()) {
+      this.setData({ ready: true, loggedIn: false, bound: false });
+      wx.stopPullDownRefresh();
+      return;
+    }
+    this.setData({ loggedIn: true });
+    // 等数据真正回来后再收起刷新指示器
+    this.load().finally(() => wx.stopPullDownRefresh());
+  },
+
   load() {
-    api
-      .get('/api/me')
-      .then((d) => {
-        this.setData({ myId: (d && d.user && d.user.id) || '' });
-        return api.get('/api/couples/current');
-      })
-      .then((d) => {
-        const couple = d && d.couple;
+    // 三个请求互相独立，并行发出；未绑定时 /api/tasks 抛 NO_ACTIVE_COUPLE，由 catch 统一处理
+    return Promise.all([
+      api.get('/api/me'),
+      api.get('/api/couples/current'),
+      api.get('/api/tasks'),
+    ])
+      .then(([meData, coupleData, taskData]) => {
+        const couple = coupleData && coupleData.couple;
         const bound = !!(couple && couple.status === 'active');
-        this.setData({ bound, partner: (d && d.partner) || null });
+        this.setData({
+          myId: (meData && meData.user && meData.user.id) || '',
+          bound,
+          partner: (coupleData && coupleData.partner) || null,
+        });
         if (!bound) {
           this.setData({ ready: true, tasks: [] });
-          return null;
+          return;
         }
-        return api.get('/api/tasks');
-      })
-      .then((d) => {
-        if (!d) return;
-        this.setData({ tasks: this.decorate(d.tasks || []), ready: true });
+        this.setData({ tasks: this.decorate((taskData && taskData.tasks) || []), ready: true });
       })
       .catch((err) => {
         this.setData({ ready: true });
         if (err && err.code !== 'NO_ACTIVE_COUPLE') {
           wx.showToast({ title: (err && err.message) || '加载失败', icon: 'none' });
         } else {
-          this.setData({ bound: false });
+          this.setData({ bound: false, tasks: [] });
         }
       });
   },
@@ -84,6 +105,14 @@ Page({
         canCancel: mine && (t.status === 'pending' || t.status === 'accepted'),
       });
     });
+  },
+
+  // 点击模板，填入标题与积分
+  useTemplate(e) {
+    const idx = Number(e.currentTarget.dataset.index);
+    const t = TEMPLATES[idx];
+    if (!t) return;
+    this.setData({ 'form.title': t.title, 'form.points': String(t.points) });
   },
 
   onTitle(e) {

@@ -2,9 +2,12 @@
   <!-- 未登录 -->
   <view class="card" wx:if="{{!user}}">
     <view class="title">我的</view>
-    <view class="muted">登录后即可绑定情侣、记录回忆地点。</view>
-    <button class="btn primary" bindtap="demoLogin">演示账号（已绑定·有数据）</button>
-    <button class="btn ghost" bindtap="mockLogin">体验登录（新建账号）</button>
+    <view class="muted">登录后绑定 TA，一起记录走过的每个地点与回忆。</view>
+    <button class="btn primary" bindtap="wechatLogin" loading="{{loading.wechat}}" disabled="{{loading.wechat}}">微信登录</button>
+    <block wx:if="{{enableDevLogin}}">
+      <button class="btn primary" bindtap="demoLogin">演示账号（已绑定·有数据）</button>
+      <button class="btn ghost" bindtap="mockLogin">体验登录（新建账号）</button>
+    </block>
   </view>
 
   <!-- 已登录：账号信息 -->
@@ -15,6 +18,7 @@
       <text class="value">{{user.nickname}}</text>
     </view>
     <button class="btn ghost" bindtap="logout">退出登录</button>
+    <button class="btn ghost" bindtap="deleteAccount">注销账号</button>
   </view>
 
   <!-- 已登录：情侣绑定 -->
@@ -24,35 +28,94 @@
     <!-- 已绑定 -->
     <block wx:if="{{couple}}">
       <view class="row">
-        <text class="label">伴侣</text>
-        <text class="value">{{partner.nickname || '已绑定'}}</text>
+        <text class="label">状态</text>
+        <text class="value">{{coupleStatusText}}</text>
       </view>
       <view class="row">
-        <text class="label">状态</text>
-        <text class="value">{{couple.status}}</text>
+        <text class="label">TA</text>
+        <text class="value">{{partner.nickname || '我的另一半'}}</text>
       </view>
-      <button class="btn ghost" bindtap="unbind">解除绑定</button>
+      <view class="muted">你们已经在一起，继续记录属于你们的足迹吧。</view>
+      <button class="btn ghost" bindtap="unbind" disabled="{{loading.unbind}}">解除绑定</button>
     </block>
 
     <!-- 未绑定 -->
     <block wx:else>
-      <view class="muted">生成邀请码发给对方，或输入对方的邀请码完成绑定。</view>
+      <view class="muted">把邀请码发给 TA，或输入 TA 的邀请码，开启你们的二人世界。</view>
 
-      <button class="btn primary" bindtap="genInvite">生成邀请码</button>
+      <button class="btn primary" bindtap="genInvite" loading="{{loading.invite}}" disabled="{{loading.invite}}">生成我的邀请码</button>
       <view class="code-box" wx:if="{{inviteCode}}">
-        <text class="label">我的邀请码</text>
+        <text class="label">我的邀请码（发给 TA）</text>
         <text class="code">{{inviteCode}}</text>
+        <view class="code-actions">
+          <button class="btn ghost" bindtap="copyInvite">复制邀请码</button>
+          <button class="btn primary" open-type="share">分享给 TA</button>
+        </view>
       </view>
 
       <view class="divider"></view>
 
       <input
         class="input"
-        placeholder="输入对方的邀请码"
+        placeholder="输入 TA 的邀请码"
         value="{{acceptCode}}"
         bindinput="onAcceptInput"
       />
-      <button class="btn primary" bindtap="acceptInvite">绑定</button>
+      <button class="btn primary" bindtap="acceptInvite" loading="{{loading.accept}}" disabled="{{loading.accept}}">绑定</button>
+      <button class="btn ghost" bindtap="scanBind" disabled="{{loading.accept}}">扫码绑定</button>
     </block>
+  </view>
+
+  <!-- 已登录：功能入口 -->
+  <view class="card" wx:if="{{user}}">
+    <view class="title">功能</view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/memoryWall/index">
+      <text class="value">回忆墙（立体相册）</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/timeline/timeline">
+      <text class="value">时间轴</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/wishlist/wishlist">
+      <text class="value">想去清单</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/planAdd/planAdd">
+      <text class="value">约会计划</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/search/search">
+      <text class="value">搜索</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/review/index">
+      <text class="value">月度/年度回顾</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/profile/index">
+      <text class="value">Love Map 档案</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/feedback/index">
+      <text class="value">意见反馈</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/pointsLedger/pointsLedger">
+      <text class="value">积分流水</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/privacy/privacy">
+      <text class="value">隐私中心</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="goPage" data-url="/pages/publicShare/publicShare">
+      <text class="value">公开分享</text>
+      <text class="chevron">›</text>
+    </view>
+    <view class="list-item nav" bindtap="exportData">
+      <text class="value">导出数据</text>
+      <text class="chevron">›</text>
+    </view>
   </view>
 </view>

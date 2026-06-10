@@ -1,0 +1,36 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">隐私中心</view>
+      <view class="muted">登录后可管理位置、相册、公开分享等授权。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">授权管理</view>
+      <view class="muted">所有授权默认关闭，可随时开启或撤回。</view>
+      <view wx:for="{{items}}" wx:key="key" class="row pv-item">
+        <view class="pv-left">
+          <view class="value">{{item.label}}</view>
+          <view class="muted">{{item.desc}}</view>
+        </view>
+        <switch checked="{{item.agreed}}" color="#544487" bindchange="onToggle" data-key="{{item.key}}" disabled="{{togglingKey && togglingKey !== item.key}}" />
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="row">
+        <view class="title">位置共享</view>
+        <text class="badge {{shareSharing ? 'green' : 'gray'}}">{{shareSharing ? '共享中' : '未共享'}}</text>
+      </view>
+      <view class="muted">我们不会默认后台持续追踪你的位置。只有你主动开启临时共享后，TA 才能看到你的最近位置；共享会在到期后自动关闭，你也可以随时手动关闭。</view>
+      <view wx:if="{{shareSharing}}" class="muted">到期：{{shareExpiresText}}</view>
+      <button wx:if="{{shareSharing}}" class="btn ghost" bindtap="stopShare" disabled="{{stopping}}">{{stopping ? '停止中…' : '立即停止共享'}}</button>
+      <button wx:else class="btn ghost" bindtap="goLocation">前往位置共享</button>
+    </view>
+  </block>
+</view>

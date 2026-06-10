@@ -58,8 +58,35 @@
   color: #544487;
 }
 
+.code-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.code-actions .btn {
+  flex: 1;
+  margin-top: 16rpx;
+}
+
 .divider {
   height: 1rpx;
   background: #eeecf6;
   margin: 32rpx 0 8rpx;
+}
+
+.list-item.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #eeecf6;
+}
+
+.list-item.nav:last-child {
+  border-bottom: none;
+}
+
+.chevron {
+  color: #cccccc;
+  font-size: 36rpx;
 }

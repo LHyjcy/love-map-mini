@@ -1,0 +1,8 @@
+.pv-item {
+  align-items: center;
+}
+
+.pv-left {
+  flex: 1;
+  padding-right: 20rpx;
+}

@@ -1,0 +1,51 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">计划详情</view>
+      <view class="muted">登录后可查看并完成计划。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{!bound}}">
+    <view class="card">
+      <view class="title">计划详情</view>
+      <view class="muted">绑定情侣关系后才能查看计划。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{!place}}">
+    <view class="card">
+      <view class="title">计划详情</view>
+      <view class="muted">没有找到该计划。</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">{{place.title}}</view>
+      <view wx:if="{{place.address}}" class="row">
+        <view class="label">地址</view>
+        <view class="value">{{place.address}}</view>
+      </view>
+      <view wx:if="{{place.city}}" class="row">
+        <view class="label">城市</view>
+        <view class="value">{{place.city}}</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title">完成并生成回忆</view>
+      <view class="label">标题</view>
+      <input class="input" value="{{title}}" placeholder="给这段回忆起个标题" bindinput="onTitleInput" />
+      <view class="label" style="margin-top: 24rpx;">内容</view>
+      <input class="input" value="{{content}}" placeholder="记录一下这次的故事（可选）" bindinput="onContentInput" />
+      <view class="label" style="margin-top: 24rpx;">心情</view>
+      <input class="input" value="{{mood}}" placeholder="当时的心情（可选）" bindinput="onMoodInput" />
+      <button class="btn" bindtap="complete" disabled="{{submitting}}">完成并生成回忆</button>
+    </view>
+  </block>
+</view>

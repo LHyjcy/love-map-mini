@@ -1,0 +1,19 @@
+.tl-item {
+  display: flex;
+  padding: 22rpx 0;
+  border-top: 1rpx solid #f0eef8;
+}
+
+.tl-item:first-child {
+  border-top: none;
+}
+
+.tl-date {
+  width: 160rpx;
+  color: #544487;
+  font-size: 26rpx;
+}
+
+.tl-body {
+  flex: 1;
+}

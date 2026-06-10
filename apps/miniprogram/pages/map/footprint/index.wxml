@@ -1,0 +1,35 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card"><view class="title">足迹地图</view><view class="muted">登录后查看足迹。</view><button class="btn" bindtap="goMe">去登录</button></view>
+  </block>
+
+  <block wx:elif="{{!bound}}">
+    <view class="card"><view class="title">足迹地图</view><view class="muted">绑定情侣关系后点亮你们的足迹。</view><button class="btn" bindtap="goMe">去绑定</button></view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">足迹 · 全国</view>
+      <view class="muted">你们已点亮 {{stats.provinceCount}} 个省 · {{stats.cityCount}} 个城市 · {{stats.placeCount}} 个地点 · 留下 {{stats.memoryCount}} 段回忆</view>
+      <view wx:if="{{loading}}" class="muted fp-hint">正在加载足迹地图…</view>
+      <view wx:elif="{{mapError}}" class="muted fp-hint">{{mapError}}</view>
+      <canvas
+        type="2d"
+        id="fpcanvas"
+        class="fp-canvas"
+        style="width:{{canvasW}}px;height:{{canvasH}}px;"
+        bindtap="onTapMap"
+      ></canvas>
+      <view wx:if="{{!loading && !mapError}}" class="muted">点击点亮的省份，查看那里的城市足迹</view>
+    </view>
+
+    <view wx:if="{{preview}}" class="fp-preview {{previewShown ? 'fp-preview--shown' : ''}}">
+      <view class="fp-preview-close" catchtap="closePreview">✕</view>
+      <view class="fp-preview-name">{{preview.name}}</view>
+      <view class="fp-preview-sub">你们在这里点亮了足迹</view>
+      <button class="fp-preview-btn" catchtap="goProvince">查看城市足迹 ›</button>
+    </view>
+  </block>
+</view>

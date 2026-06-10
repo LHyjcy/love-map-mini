@@ -1,14 +1,37 @@
 {
   "pages": [
     "pages/home/home",
-    "pages/map/map",
     "pages/tasks/tasks",
     "pages/shop/shop",
     "pages/events/events",
     "pages/me/me",
     "pages/addPlace/addPlace",
     "pages/checkin/checkin",
-    "pages/memories/memories"
+    "pages/memories/memories",
+    "pages/memoryDetail/memoryDetail",
+    "pages/placeDetail/placeDetail",
+    "pages/timeline/timeline",
+    "pages/wishlist/wishlist",
+    "pages/pointsLedger/pointsLedger",
+    "pages/privacy/privacy",
+    "pages/publicShare/publicShare",
+    "pages/planAdd/planAdd",
+    "pages/planDetail/planDetail",
+    "pages/search/search",
+    "pages/map/index",
+    "pages/map/real/index",
+    "pages/map/footprint/index",
+    "pages/map/footprint/province/index",
+    "pages/map/footprint/city/index",
+    "pages/location/index",
+    "pages/plan/index",
+    "pages/interact/index",
+    "pages/mood/index",
+    "pages/qa/index",
+    "pages/review/index",
+    "pages/memoryWall/index",
+    "pages/profile/index",
+    "pages/feedback/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#544487",
@@ -16,15 +39,25 @@
     "navigationBarTitleText": "love-map-mini",
     "backgroundColor": "#f5f4fb"
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于地图打卡、查看你们去过的地点，以及你主动开启的临时位置共享（仅前台、可随时关闭）"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "onLocationChange",
+    "startLocationUpdate"
+  ],
   "tabBar": {
     "color": "#999999",
     "selectedColor": "#544487",
     "backgroundColor": "#ffffff",
     "list": [
       { "pagePath": "pages/home/home", "text": "首页" },
-      { "pagePath": "pages/map/map", "text": "地图" },
-      { "pagePath": "pages/tasks/tasks", "text": "任务" },
-      { "pagePath": "pages/shop/shop", "text": "商城" },
+      { "pagePath": "pages/map/index", "text": "地图" },
+      { "pagePath": "pages/plan/index", "text": "计划" },
+      { "pagePath": "pages/interact/index", "text": "互动" },
       { "pagePath": "pages/me/me", "text": "我的" }
     ]
   },

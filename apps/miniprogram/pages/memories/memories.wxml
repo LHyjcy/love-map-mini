@@ -30,8 +30,38 @@
         </picker>
         <input class="input" placeholder="标题" value="{{form.title}}" bindinput="onTitle" />
         <input class="input" placeholder="内容（可选）" value="{{form.content}}" bindinput="onContent" />
+        <button class="btn mini ai-copy-btn" bindtap="aiWriteCopy" disabled="{{aiLoading}}">
+          {{aiLoading ? '生成中…' : '✨ 帮我写文案'}}
+        </button>
         <input class="input" placeholder="心情（可选）" value="{{form.mood}}" bindinput="onMood" />
-        <button class="btn" bindtap="addMemory">记录</button>
+
+        <view class="row tag-input-row">
+          <input class="input tag-input" placeholder="标签（可选，最多 8 个）" value="{{tagInput}}"
+            bindinput="onTagInput" bindconfirm="addTag" confirm-type="done" />
+          <button class="btn mini" bindtap="addTag">添加</button>
+        </view>
+        <view wx:if="{{tags.length > 0}}" class="tag-chips">
+          <view wx:for="{{tags}}" wx:key="*this" class="badge tag-chip">
+            <text>{{item}}</text>
+            <text class="tag-chip-del" catchtap="removeTag" data-index="{{index}}">✕</text>
+          </view>
+        </view>
+
+        <view class="row mem-photo-head">
+          <text class="label">照片（{{pendingPhotos.length}}/9）</text>
+          <text class="add-photo" bindtap="choosePhotos">＋ 添加照片</text>
+        </view>
+        <view wx:if="{{pendingPhotos.length > 0}}" class="photo-grid">
+          <view wx:for="{{pendingPhotos}}" wx:key="tempFilePath" class="thumb-wrap">
+            <image class="thumb" src="{{item.tempFilePath}}" mode="aspectFill"
+              bindtap="previewPending" data-url="{{item.tempFilePath}}" />
+            <text class="thumb-del" catchtap="removePending" data-index="{{index}}">✕</text>
+          </view>
+        </view>
+
+        <button class="btn" bindtap="addMemory" disabled="{{submitting}}">
+          {{submitting ? '保存中…' : '记录'}}
+        </button>
       </block>
 
       <view wx:else class="muted">还没有地点，请先到地图添加地点。</view>
@@ -40,11 +70,16 @@
     <view class="card">
       <view class="title">回忆列表</view>
       <view wx:if="{{memories.length === 0}}" class="muted">还没有回忆，去记录第一条吧。</view>
-      <view wx:for="{{memories}}" wx:key="id" class="list-item">
+      <view wx:for="{{memories}}" wx:key="id" class="list-item" bindtap="goDetail" data-id="{{item.id}}">
         <view class="value">{{item.title}}</view>
         <view class="muted">{{item.mood}} · {{item.mediaCount}} 张照片</view>
         <view wx:if="{{item.content}}" class="mem-content">{{item.content}}</view>
+        <view wx:if="{{item.tagList.length > 0}}" class="tag-chips">
+          <text wx:for="{{item.tagList}}" wx:for-item="tag" wx:key="*this" class="badge tag-badge">{{tag}}</text>
+        </view>
       </view>
+      <view wx:if="{{loadingMore}}" class="muted">加载中…</view>
+      <view wx:elif="{{memories.length > 0 && !nextCursor}}" class="muted">没有更多了</view>
     </view>
   </block>
 </view>

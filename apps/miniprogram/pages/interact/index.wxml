@@ -1,0 +1,69 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{!ready}}" class="card center">
+    <view class="muted">加载中…</view>
+  </view>
+
+  <!-- 未登录 -->
+  <view wx:elif="{{ready && !loggedIn}}" class="card center">
+    <view class="title">互动中心</view>
+    <view class="muted">登录后可以做任务、赚积分、记录心情。</view>
+    <button class="btn" bindtap="goMe">去『我的』登录</button>
+  </view>
+
+  <!-- 已登录未绑定 -->
+  <view wx:elif="{{ready && !bound}}" class="card center">
+    <view class="title">互动中心</view>
+    <view class="muted">先绑定情侣，才能一起互动。</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <!-- 已登录已绑定 -->
+  <block wx:if="{{ready && bound}}">
+    <!-- 积分余额 hero -->
+    <view class="card hero">
+      <view class="hero-label">积分余额</view>
+      <view class="hero-value">{{balance}}</view>
+      <text class="pill" data-url="/pages/pointsLedger/pointsLedger" bindtap="goEntry">查看流水 ›</text>
+    </view>
+
+    <!-- 今日心情 mini -->
+    <view wx:if="{{moodReady}}" class="card">
+      <view class="title">今日心情</view>
+      <view class="row">
+        <text class="label">我的</text>
+        <text class="value mood-emoji">{{myMood}}</text>
+      </view>
+      <view class="row">
+        <text class="label">TA 的</text>
+        <text class="value mood-emoji">{{partnerMood}}</text>
+      </view>
+    </view>
+
+    <!-- 情侣问答 mini -->
+    <view wx:if="{{qaReady}}" class="card">
+      <view class="row">
+        <text class="title" style="margin:0">情侣问答</text>
+        <text class="badge {{qaStatus === '已揭晓' ? 'green' : ''}}">{{qaStatus}}</text>
+      </view>
+    </view>
+
+    <!-- 入口列表 -->
+    <view class="card">
+      <view class="title">更多互动</view>
+      <view
+        wx:for="{{entries}}"
+        wx:key="key"
+        class="list-item entry"
+        data-url="{{item.url}}"
+        bindtap="goEntry"
+      >
+        <view class="entry-main">
+          <text class="value">{{item.label}}</text>
+          <text class="muted">{{item.desc}}</text>
+        </view>
+        <text class="chevron">›</text>
+      </view>
+    </view>
+  </block>
+</view>

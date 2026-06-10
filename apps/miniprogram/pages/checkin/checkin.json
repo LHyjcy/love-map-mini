@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "位置打卡"
+  "navigationBarTitleText": "位置打卡",
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
 }

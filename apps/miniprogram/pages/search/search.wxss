@@ -1,0 +1,11 @@
+/* pages/search/search.wxss — 复用全局类，仅补充搜索栏布局 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.search-input {
+  flex: 1;
+  margin-top: 0;
+}

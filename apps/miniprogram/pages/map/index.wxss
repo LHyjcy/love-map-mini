@@ -1,0 +1,22 @@
+.stat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+.stat {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 16rpx 0;
+  text-align: center;
+}
+.stat-num {
+  font-size: 44rpx;
+  font-weight: 600;
+  color: #544487;
+}
+.list-item.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chevron { color: #c8c2e0; }

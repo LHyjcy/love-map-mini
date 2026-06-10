@@ -3,6 +3,11 @@
   text-align: center;
 }
 
+.item-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
 .picker-box {
   margin-top: 16rpx;
   padding: 18rpx 24rpx;

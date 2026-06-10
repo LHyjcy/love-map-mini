@@ -10,7 +10,8 @@
       show-location
       bindtap="onMapTap"
     ></map>
-    <view class="muted">已选坐标：{{latitude}}, {{longitude}}</view>
+    <view wx:if="{{located}}" class="muted">已选坐标：{{latitude}}, {{longitude}}</view>
+    <view wx:else class="muted">点击地图或使用当前位置选择地点</view>
     <button class="btn ghost" bindtap="useCurrentLocation">用当前位置</button>
   </view>
 
@@ -25,6 +26,16 @@
     <view class="row">
       <view class="label">地址</view>
       <input class="input" placeholder="可选" value="{{address}}" bindinput="onAddressInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">城市</view>
+      <input class="input" placeholder="如 杭州（用于足迹点亮）" value="{{city}}" bindinput="onCityInput" />
+    </view>
+
+    <view class="row">
+      <view class="label">省份</view>
+      <input class="input" placeholder="如 浙江（可选）" value="{{province}}" bindinput="onProvinceInput" />
     </view>
 
     <view class="row">

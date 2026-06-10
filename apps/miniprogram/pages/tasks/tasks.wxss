@@ -2,3 +2,13 @@
 .center {
   text-align: center;
 }
+
+/* 快捷任务模板 chips */
+.tpl-row {
+  margin-top: 8rpx;
+}
+
+.tpl-chip {
+  display: inline-block;
+  margin: 8rpx 12rpx 0 0;
+}

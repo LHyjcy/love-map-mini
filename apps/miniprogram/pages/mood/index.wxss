@@ -1,0 +1,54 @@
+/* pages/mood/index.wxss */
+.center {
+  text-align: center;
+}
+
+.mood-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin: 8rpx 0 24rpx;
+}
+
+.mood-item {
+  width: calc((100% - 32rpx) / 3);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 0;
+  background: #f5f4fb;
+  border: 2rpx solid transparent;
+  border-radius: 16rpx;
+}
+
+.mood-item.active {
+  background: #efe9ff;
+  border-color: #7c5cff;
+}
+
+.mood-emoji {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.mood-label {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #2a2540;
+}
+
+.partner-row {
+  align-items: center;
+  gap: 16rpx;
+}
+
+.partner-emoji {
+  font-size: 48rpx;
+  line-height: 1;
+}
+
+.partner-note {
+  margin-top: 12rpx;
+  word-break: break-all;
+}

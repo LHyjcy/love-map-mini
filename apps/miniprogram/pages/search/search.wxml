@@ -1,0 +1,50 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">搜索</view>
+      <view class="muted">登录后可搜索你们的地点与回忆。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{!bound}}">
+    <view class="card">
+      <view class="title">搜索</view>
+      <view class="muted">绑定情侣关系后才能搜索地点与回忆。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">搜索</view>
+      <view class="search-bar">
+        <input class="input search-input" value="{{q}}" placeholder="搜索地点或回忆" confirm-type="search" bindinput="onInput" bindconfirm="doSearch" />
+        <button class="btn mini" bindtap="doSearch">搜索</button>
+      </view>
+    </view>
+
+    <view wx:if="{{searched && places.length === 0 && memories.length === 0}}" class="card">
+      <view class="muted">没有找到相关内容</view>
+    </view>
+
+    <view wx:if="{{places.length > 0}}" class="card">
+      <view class="title">地点</view>
+      <view wx:for="{{places}}" wx:key="id" class="list-item" bindtap="goPlace" data-id="{{item.id}}">
+        <view class="value">{{item.title}}</view>
+        <view wx:if="{{item.address}}" class="muted">{{item.address}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{memories.length > 0}}" class="card">
+      <view class="title">回忆</view>
+      <view wx:for="{{memories}}" wx:key="id" class="list-item" bindtap="goMemory" data-id="{{item.id}}">
+        <view class="value">{{item.title}}</view>
+        <view wx:if="{{item.dateText}}" class="muted">{{item.dateText}}</view>
+        <view wx:if="{{item.snippet}}" class="muted">{{item.snippet}}</view>
+      </view>
+    </view>
+  </block>
+</view>

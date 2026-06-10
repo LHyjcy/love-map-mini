@@ -1,0 +1,91 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">回顾</view>
+      <view class="muted">登录后查看你们的月度 / 年度回顾。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{!bound}}">
+    <view class="card">
+      <view class="title">回顾</view>
+      <view class="muted">绑定情侣关系后，一起回看走过的足迹与回忆。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 周期切换 -->
+    <view class="rv-toggle">
+      <view class="rv-chip {{period === 'month' ? 'active' : ''}}" data-period="month" bindtap="switchPeriod">本月</view>
+      <view class="rv-chip {{period === 'year' ? 'active' : ''}}" data-period="year" bindtap="switchPeriod">今年</view>
+    </view>
+
+    <view wx:if="{{loading}}" class="muted center">正在生成你们的回顾…</view>
+
+    <block wx:elif="{{review}}">
+      <!-- 大数字统计卡 -->
+      <view class="card rv-stats">
+        <view class="muted rv-sub">{{period === 'year' ? '今年' : '这个月'}}，你们一起——</view>
+        <view class="rv-line">留下 <text class="rv-num">{{review.memoryCount}}</text> 段回忆</view>
+        <view class="rv-line">珍藏 <text class="rv-num">{{review.photoCount}}</text> 张照片</view>
+        <view class="rv-line">去过 <text class="rv-num">{{review.placeCount}}</text> 个地点</view>
+        <view class="rv-line">点亮 <text class="rv-num">{{review.cityCount}}</text> 城 · <text class="rv-num">{{review.provinceCount}}</text> 省</view>
+        <view class="muted rv-warm">每一处足迹，都是我们爱过的证明 ❤</view>
+      </view>
+
+      <!-- AI 回顾文案 -->
+      <view class="card rv-summary-card" wx:if="{{summary}}">
+        <view class="rv-summary-quote">“</view>
+        <view class="rv-summary-text">{{summary}}</view>
+      </view>
+      <button
+        class="btn rv-ai-btn"
+        bindtap="genSummary"
+        loading="{{aiLoading}}"
+        disabled="{{aiLoading}}"
+      >✨ 生成回顾文案</button>
+
+      <!-- topTags -->
+      <view wx:if="{{review.topTags.length}}" class="card">
+        <view class="title">出现最多的标签</view>
+        <view class="rv-tags">
+          <view wx:for="{{review.topTags}}" wx:key="tag" class="badge rv-tag">#{{item.tag}} ×{{item.count}}</view>
+        </view>
+      </view>
+
+      <!-- 近期回忆 -->
+      <view wx:if="{{review.recentMemories.length}}" class="card">
+        <view class="title">近期回忆</view>
+        <view
+          wx:for="{{review.recentMemories}}"
+          wx:key="id"
+          class="list-item rv-mem"
+          data-id="{{item.id}}"
+          bindtap="openMemory"
+        >
+          <view class="value">{{item.title}}</view>
+          <view class="muted">{{item.date}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{!review.recentMemories.length && !review.memoryCount}}" class="card">
+        <view class="muted center">这个周期还没有回忆，去记录第一段吧～</view>
+      </view>
+
+      <!-- 保存海报 -->
+      <button class="btn" bindtap="savePoster" loading="{{saving}}" disabled="{{saving}}">保存回顾海报</button>
+    </block>
+  </block>
+
+  <!-- 离屏海报画布（始终挂载，置于屏幕外） -->
+  <canvas
+    type="2d"
+    id="poster"
+    class="rv-poster-canvas"
+    style="width:{{posterW}}px;height:{{posterH}}px;"
+  ></canvas>
+</view>

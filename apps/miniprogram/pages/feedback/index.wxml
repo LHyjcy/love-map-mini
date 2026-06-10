@@ -1,0 +1,48 @@
+<!-- pages/feedback/index.wxml -->
+<view class="container">
+
+  <!-- 未登录提示 -->
+  <view wx:if="{{ready && !loggedIn}}" class="card center">
+    <view class="title">意见反馈</view>
+    <view class="muted">登录后即可提交反馈与查看处理进度。</view>
+    <button class="btn" bindtap="goMe">去登录</button>
+  </view>
+
+  <block wx:if="{{loggedIn}}">
+    <!-- 提交表单 -->
+    <view class="card">
+      <view class="title">意见反馈</view>
+      <textarea
+        class="input feedback-textarea"
+        placeholder="说说你的想法、遇到的问题或建议…"
+        maxlength="{{maxContent}}"
+        value="{{content}}"
+        bindinput="onContentInput"
+      />
+      <input
+        class="input"
+        placeholder="联系方式（可选）"
+        maxlength="{{maxContact}}"
+        value="{{contact}}"
+        bindinput="onContactInput"
+      />
+      <button class="btn" disabled="{{submitting}}" bindtap="submit">
+        {{submitting ? '提交中…' : '提交'}}
+      </button>
+    </view>
+
+    <!-- 我的反馈列表 -->
+    <view class="card">
+      <view class="title">我的反馈</view>
+      <view wx:if="{{ready && list.length === 0}}" class="muted">还没有反馈，欢迎随时告诉我们。</view>
+      <view wx:for="{{list}}" wx:key="id" class="list-item">
+        <view class="row">
+          <text class="value feedback-content">{{item.content}}</text>
+          <view class="badge {{item.statusClass}}">{{item.statusText}}</view>
+        </view>
+        <view class="muted">{{item.dateText}}</view>
+      </view>
+    </view>
+  </block>
+
+</view>

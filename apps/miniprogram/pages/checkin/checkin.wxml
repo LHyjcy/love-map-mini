@@ -1,3 +1,9 @@
+<view class="container" wx:if="{{!ready}}">
+  <view class="card">
+    <view class="muted">加载中…</view>
+  </view>
+</view>
+
 <view class="container" wx:if="{{ready}}">
 
   <block wx:if="{{!loggedIn}}">
@@ -25,7 +31,7 @@
           <view class="value">{{shareLabels[shareIndex]}}</view>
         </picker>
       </view>
-      <button class="btn" bindtap="doCheckin">打卡</button>
+      <button class="btn" bindtap="doCheckin" disabled="{{checkingIn}}" loading="{{checkingIn}}">打卡</button>
       <view class="muted">打卡由你主动发起。共享范围默认为「仅自己」。只有当你选择「共享给对方」且未过期时，对方才能看到你的位置。</view>
     </view>
 
@@ -45,6 +51,15 @@
         </view>
       </block>
       <view wx:else class="muted">对方暂未共享位置</view>
+    </view>
+
+    <view wx:if="{{coCandidate}}" class="card co-checkin">
+      <view class="row">
+        <view class="title">共同打卡</view>
+        <text class="badge green">就在附近</text>
+      </view>
+      <view class="muted">你们刚刚在「{{coCandidate.placeTitle || '同一地点'}}」相遇啦（相距约 {{coCandidate.distanceMeters}}m，{{coCandidate.withinMinutes}} 分钟内）。把这一刻存成你们的共同回忆吧～</view>
+      <button class="btn" bindtap="createCoMemory" disabled="{{creatingCoMemory}}" loading="{{creatingCoMemory}}">生成共同回忆</button>
     </view>
 
     <view class="card">

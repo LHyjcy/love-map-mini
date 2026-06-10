@@ -1,0 +1,43 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">地图</view>
+      <view class="muted">登录后查看你们的足迹与地图。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{!bound}}">
+    <view class="card">
+      <view class="title">地图</view>
+      <view class="muted">绑定情侣关系后即可记录足迹。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">我们的足迹</view>
+      <view class="stat-grid">
+        <view class="stat"><view class="stat-num">{{stats.provinceCount}}</view><view class="muted">点亮省份</view></view>
+        <view class="stat"><view class="stat-num">{{stats.cityCount}}</view><view class="muted">点亮城市</view></view>
+        <view class="stat"><view class="stat-num">{{stats.placeCount}}</view><view class="muted">记录地点</view></view>
+        <view class="stat"><view class="stat-num">{{stats.memoryCount}}</view><view class="muted">保存回忆</view></view>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="list-item nav" bindtap="goReal">
+        <text class="value">真实地图</text><text class="chevron">›</text>
+      </view>
+      <view class="list-item nav" bindtap="goFootprint">
+        <text class="value">足迹地图</text><text class="chevron">›</text>
+      </view>
+      <view class="list-item nav" bindtap="goLocation">
+        <text class="value">位置共享</text><text class="chevron">›</text>
+      </view>
+    </view>
+  </block>
+</view>

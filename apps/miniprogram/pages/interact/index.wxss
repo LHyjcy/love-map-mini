@@ -1,0 +1,53 @@
+/* pages/interact/index.wxss — 互动中心 */
+
+/* 积分余额 hero 卡片 */
+.hero {
+  background: linear-gradient(135deg, #6a5acd 0%, #544487 100%);
+  text-align: center;
+  color: #ffffff;
+}
+
+.hero-label {
+  font-size: 26rpx;
+  opacity: 0.85;
+}
+
+.hero-value {
+  font-size: 72rpx;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 12rpx 0 20rpx;
+}
+
+.hero .pill {
+  color: #544487;
+  background: #ffffff;
+}
+
+/* 心情 emoji */
+.mood-emoji {
+  font-size: 40rpx;
+}
+
+/* 入口行 */
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.entry-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.entry-main .muted {
+  margin-top: 6rpx;
+}
+
+.chevron {
+  color: #c4bedd;
+  font-size: 40rpx;
+  line-height: 1;
+  padding-left: 16rpx;
+}

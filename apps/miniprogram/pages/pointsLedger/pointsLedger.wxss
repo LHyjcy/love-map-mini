@@ -1,0 +1,21 @@
+.pl-item {
+  align-items: flex-start;
+}
+
+.pl-left {
+  flex: 1;
+  padding-right: 20rpx;
+}
+
+.pl-pts {
+  font-weight: 600;
+  font-size: 30rpx;
+}
+
+.pl-pts.pos {
+  color: #1f9d63;
+}
+
+.pl-pts.neg {
+  color: #c0392b;
+}

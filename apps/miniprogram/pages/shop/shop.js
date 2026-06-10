@@ -6,6 +6,7 @@ const RDM_TEXT = { unused: '未使用', used: '已使用', cancelled: '已取消
 Page({
   data: {
     ready: false,
+    loading: false,
     loggedIn: false,
     bound: false,
     tab: 'shop', // shop | bag
@@ -13,6 +14,8 @@ Page({
     items: [],
     redemptions: [],
     form: { title: '', pricePoints: '', stock: '' },
+    submitting: false, // 上架中
+    actingId: '', // 正在兑换/操作的记录或商品 id，避免重复点击
   },
 
   onShow() {
@@ -24,14 +27,25 @@ Page({
     this.load();
   },
 
+  onPullDownRefresh() {
+    if (!api.getToken()) {
+      this.setData({ ready: true, loggedIn: false, bound: false });
+      wx.stopPullDownRefresh();
+      return;
+    }
+    this.setData({ loggedIn: true });
+    this.load().then(() => wx.stopPullDownRefresh());
+  },
+
   load() {
-    api
+    this.setData({ loading: true });
+    return api
       .get('/api/couples/current')
       .then((d) => {
         const bound = !!(d && d.couple && d.couple.status === 'active');
         this.setData({ bound });
         if (!bound) {
-          this.setData({ ready: true });
+          this.setData({ ready: true, loading: false });
           return null;
         }
         return Promise.all([
@@ -43,22 +57,25 @@ Page({
       .then((res) => {
         if (!res) return;
         const [bal, items, rdm] = res;
+        const balance = (bal && bal.balance) || 0;
         this.setData({
-          balance: (bal && bal.balance) || 0,
-          items: this.decorateItems((items && items.items) || []),
+          balance,
+          items: this.decorateItems((items && items.items) || [], balance),
           redemptions: this.decorateRdm((rdm && rdm.redemptions) || []),
           ready: true,
+          loading: false,
         });
       })
       .catch((err) => {
-        this.setData({ ready: true });
+        this.setData({ ready: true, loading: false });
         if (err && err.code === 'NO_ACTIVE_COUPLE') this.setData({ bound: false });
         else wx.showToast({ title: (err && err.message) || '加载失败', icon: 'none' });
       });
   },
 
-  decorateItems(items) {
-    const bal = this.data.balance;
+  // balance 通过参数传入，避免读到 setData 尚未提交的旧值
+  decorateItems(items, balance) {
+    const bal = typeof balance === 'number' ? balance : this.data.balance;
     return items.map((it) =>
       Object.assign({}, it, {
         canRedeem: it.status === 'active' && it.stock > 0 && bal >= it.pricePoints,
@@ -90,11 +107,13 @@ Page({
   },
 
   createItem() {
+    if (this.data.submitting) return;
     const title = (this.data.form.title || '').trim();
     if (!title) {
       wx.showToast({ title: '请输入商品名称', icon: 'none' });
       return;
     }
+    this.setData({ submitting: true });
     api
       .post('/api/shop/items', {
         title,
@@ -104,42 +123,39 @@ Page({
       .then(() => {
         this.setData({ form: { title: '', pricePoints: '', stock: '' } });
         wx.showToast({ title: '已上架', icon: 'success' });
-        this.load();
+        return this.load();
       })
-      .catch((err) => wx.showToast({ title: (err && err.message) || '上架失败', icon: 'none' }));
+      .catch((err) => wx.showToast({ title: (err && err.message) || '上架失败', icon: 'none' }))
+      .then(() => this.setData({ submitting: false }));
   },
 
+  // 兑换、核销、退回共用一个互斥锁 actingId，避免重复点击
   redeem(e) {
     const id = e.currentTarget.dataset.id;
-    api
-      .post(`/api/shop/items/${id}/redeem`, {})
-      .then(() => {
-        wx.showToast({ title: '兑换成功', icon: 'success' });
-        this.load();
-      })
-      .catch((err) => wx.showToast({ title: (err && err.message) || '兑换失败', icon: 'none' }));
+    this.runAction(id, `/api/shop/items/${id}/redeem`, '兑换成功', '兑换失败');
   },
 
   useRdm(e) {
     const id = e.currentTarget.dataset.id;
-    api
-      .post(`/api/shop/redemptions/${id}/use`, {})
-      .then(() => {
-        wx.showToast({ title: '已核销', icon: 'success' });
-        this.load();
-      })
-      .catch((err) => wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' }));
+    this.runAction(id, `/api/shop/redemptions/${id}/use`, '已核销', '操作失败');
   },
 
   cancelRdm(e) {
     const id = e.currentTarget.dataset.id;
+    this.runAction(id, `/api/shop/redemptions/${id}/cancel`, '已退回', '操作失败');
+  },
+
+  runAction(id, url, okText, failText) {
+    if (this.data.actingId) return;
+    this.setData({ actingId: id });
     api
-      .post(`/api/shop/redemptions/${id}/cancel`, {})
+      .post(url, {})
       .then(() => {
-        wx.showToast({ title: '已退回', icon: 'success' });
-        this.load();
+        wx.showToast({ title: okText, icon: 'success' });
+        return this.load();
       })
-      .catch((err) => wx.showToast({ title: (err && err.message) || '操作失败', icon: 'none' }));
+      .catch((err) => wx.showToast({ title: (err && err.message) || failText, icon: 'none' }))
+      .then(() => this.setData({ actingId: '' }));
   },
 
   goMe() {

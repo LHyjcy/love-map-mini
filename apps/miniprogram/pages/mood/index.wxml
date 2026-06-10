@@ -1,0 +1,56 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{!ready}}" class="card center">
+    <view class="muted">加载中…</view>
+  </view>
+
+  <!-- 未登录 / 未绑定 -->
+  <view wx:if="{{ready && !loggedIn}}" class="card center">
+    <view class="title">今日心情</view>
+    <view class="muted">登录并绑定后即可和 TA 分享每天的心情。</view>
+    <button class="btn" bindtap="goMe">去『我的』登录</button>
+  </view>
+  <view wx:elif="{{ready && !bound}}" class="card center">
+    <view class="title">今日心情</view>
+    <view class="muted">先绑定情侣，才能互相看到心情。</view>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <block wx:if="{{ready && bound}}">
+    <view class="card">
+      <view class="title">我的今日心情</view>
+      <view class="mood-grid">
+        <view
+          wx:for="{{moods}}"
+          wx:key="key"
+          class="mood-item {{selected === item.key ? 'active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="pickMood"
+        >
+          <text class="mood-emoji">{{item.emoji}}</text>
+          <text class="mood-label">{{item.label}}</text>
+        </view>
+      </view>
+      <input
+        class="input"
+        placeholder="说点什么吧（选填，最多 100 字）"
+        maxlength="100"
+        value="{{note}}"
+        bindinput="onNote"
+      />
+      <button class="btn" bindtap="saveMood" disabled="{{submitting}}" loading="{{submitting}}">保存心情</button>
+    </view>
+
+    <view class="card">
+      <view class="title">TA 的今日心情</view>
+      <view wx:if="{{partner}}">
+        <view class="row partner-row">
+          <text class="partner-emoji">{{partner.emoji}}</text>
+          <text class="value">{{partner.label}}</text>
+        </view>
+        <view wx:if="{{partner.note}}" class="muted partner-note">{{partner.note}}</view>
+      </view>
+      <view wx:else class="muted">今天还没有填写</view>
+    </view>
+  </block>
+</view>

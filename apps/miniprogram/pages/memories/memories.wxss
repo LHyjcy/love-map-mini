@@ -6,7 +6,72 @@
   margin-top: 8rpx;
 }
 
+.ai-copy-btn {
+  margin-bottom: 16rpx;
+}
+
 .list-item .input,
 .card .input {
   margin-bottom: 16rpx;
+}
+
+.tag-input-row {
+  align-items: center;
+}
+.tag-input {
+  flex: 1;
+}
+.tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12rpx;
+}
+.tag-chip {
+  display: flex;
+  align-items: center;
+  margin: 0 12rpx 12rpx 0;
+}
+.tag-chip-del {
+  margin-left: 10rpx;
+  font-size: 22rpx;
+  opacity: 0.7;
+}
+.tag-badge {
+  margin: 0 12rpx 12rpx 0;
+}
+
+.mem-photo-head {
+  margin-top: 8rpx;
+}
+.add-photo {
+  color: #544487;
+  font-size: 26rpx;
+}
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 12rpx 0;
+}
+.thumb-wrap {
+  position: relative;
+  margin: 0 16rpx 16rpx 0;
+}
+.thumb {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  background: #f0eef8;
+}
+.thumb-del {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border-radius: 999rpx;
+  font-size: 22rpx;
 }

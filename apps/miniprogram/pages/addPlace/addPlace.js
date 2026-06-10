@@ -6,10 +6,13 @@ Page({
     longitude: 116.397,
     title: '',
     address: '',
+    city: '',
+    province: '',
     typeIndex: 0,
     typeLabels: ['去过', '想去', '计划'],
     typeValues: ['visited', 'wishlist', 'plan'],
-    markers: []
+    markers: [],
+    located: false
   },
 
   onShow() {
@@ -24,7 +27,8 @@ Page({
     this.setData({
       latitude: latitude,
       longitude: longitude,
-      markers: [{ id: 1, latitude: latitude, longitude: longitude }]
+      markers: [{ id: 1, latitude: latitude, longitude: longitude }],
+      located: true
     })
   },
 
@@ -36,7 +40,8 @@ Page({
         that.setData({
           latitude: res.latitude,
           longitude: res.longitude,
-          markers: [{ id: 1, latitude: res.latitude, longitude: res.longitude }]
+          markers: [{ id: 1, latitude: res.latitude, longitude: res.longitude }],
+          located: true
         })
       },
       fail() {
@@ -53,12 +58,24 @@ Page({
     this.setData({ address: e.detail.value })
   },
 
+  onCityInput(e) {
+    this.setData({ city: e.detail.value })
+  },
+
+  onProvinceInput(e) {
+    this.setData({ province: e.detail.value })
+  },
+
   onTypeChange(e) {
     this.setData({ typeIndex: Number(e.detail.value) })
   },
 
   onSave() {
     const data = this.data
+    if (!data.located) {
+      wx.showToast({ title: '请先在地图上选择位置', icon: 'none' })
+      return
+    }
     const title = (data.title || '').trim()
     if (!title) {
       wx.showToast({ title: '请输入标题', icon: 'none' })
@@ -74,6 +91,8 @@ Page({
       latitude: data.latitude,
       longitude: data.longitude,
       address: data.address,
+      city: (data.city || '').trim() || undefined,
+      province: (data.province || '').trim() || undefined,
       placeType: data.typeValues[data.typeIndex]
     }).then(function () {
       wx.showToast({ title: '已保存', icon: 'success' })

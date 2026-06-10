@@ -1,4 +1,5 @@
 {
   "navigationBarTitleText": "任务",
+  "enablePullDownRefresh": true,
   "usingComponents": {}
 }

@@ -1,0 +1,22 @@
+/* 地点详情：主要复用全局 app.wxss 中的通用样式 */
+
+/* 「一起决定」投票按钮一行三列，等宽展示 */
+.vote-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.vote-btn {
+  flex: 1;
+  margin-top: 0;
+  padding: 0 8rpx;
+  font-size: 26rpx;
+}
+
+/* 高亮当前用户已选的投票项 */
+.vote-btn.active {
+  background: #544487;
+  color: #ffffff;
+  border-color: #544487;
+}

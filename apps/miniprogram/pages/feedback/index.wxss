@@ -1,0 +1,19 @@
+/* pages/feedback/index.wxss */
+/* 多数样式复用 app.wxss（.card/.input/.btn/.badge/.list-item 等），此处仅做局部补充。 */
+
+.feedback-textarea {
+  height: 200rpx;
+  line-height: 1.5;
+}
+
+/* 列表项内容左侧自适应换行，状态徽标固定在右侧。 */
+.feedback-content {
+  flex: 1;
+  margin-right: 16rpx;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.list-item .row {
+  align-items: flex-start;
+}

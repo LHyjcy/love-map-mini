@@ -1,0 +1,108 @@
+<!-- pages/profile/index.wxml — Love Map 小档案 -->
+<view class="container">
+
+  <!-- 加载中 -->
+  <view wx:if="{{status === 'loading'}}" class="card center">
+    <text class="muted">加载中…</text>
+  </view>
+
+  <!-- 未登录 -->
+  <view wx:elif="{{status === 'not-logged-in'}}" class="card center">
+    <view class="title">Love Map 小档案</view>
+    <text class="muted">登录后，记录你们彼此的小事实与问答回忆</text>
+    <button class="btn" bindtap="goMe">去登录</button>
+  </view>
+
+  <!-- 未绑定情侣 -->
+  <view wx:elif="{{status === 'not-bound'}}" class="card center">
+    <view class="title">还没有和 TA 绑定</view>
+    <text class="muted">绑定情侣后，就能一起填写小档案、回顾问答啦</text>
+    <button class="btn" bindtap="goMe">去绑定</button>
+  </view>
+
+  <!-- 正常 -->
+  <block wx:else>
+
+    <!-- 关于我 -->
+    <view class="card">
+      <view class="title">关于我</view>
+
+      <view wx:if="{{mine.length === 0}}" class="muted">还没有记录，添加一条吧</view>
+
+      <view wx:for="{{mine}}" wx:key="id" class="row list-item">
+        <view class="label">{{item.key}}</view>
+        <view class="row" style="padding:0">
+          <text class="value">{{item.value}}</text>
+          <button
+            class="btn ghost mini"
+            disabled="{{deletingIds[item.id]}}"
+            data-id="{{item.id}}"
+            bindtap="deleteFact"
+          >删除</button>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <!-- 快捷 key 芯片 -->
+      <view class="chips">
+        <text
+          wx:for="{{quickKeys}}"
+          wx:key="*this"
+          class="pill chip"
+          data-key="{{item}}"
+          bindtap="fillKey"
+        >{{item}}</text>
+      </view>
+
+      <input
+        class="input"
+        placeholder="名称，如 喜欢吃"
+        value="{{formKey}}"
+        maxlength="40"
+        bindinput="onKeyInput"
+      />
+      <input
+        class="input"
+        placeholder="内容，如 螺蛳粉"
+        value="{{formValue}}"
+        maxlength="200"
+        bindinput="onValueInput"
+      />
+      <button class="btn" disabled="{{saving}}" bindtap="saveFact">保存</button>
+    </view>
+
+    <!-- 关于 TA -->
+    <view class="card">
+      <view class="title">关于 TA</view>
+      <view wx:if="{{partner.length === 0}}" class="muted">TA 还没有填写</view>
+      <view wx:for="{{partner}}" wx:key="id" class="row list-item">
+        <view class="label">{{item.key}}</view>
+        <text class="value">{{item.value}}</text>
+      </view>
+    </view>
+
+    <!-- 我们的问答 -->
+    <view class="card">
+      <view class="title">我们的问答</view>
+
+      <view wx:if="{{qaHistory.length === 0}}" class="center">
+        <text class="muted">一起回答今日问答，慢慢了解彼此</text>
+        <button class="btn ghost" bindtap="goQa">去回答今日问答</button>
+      </view>
+
+      <view wx:for="{{qaHistory}}" wx:key="questionKey" class="qa-card">
+        <view class="qa-answer">
+          <text class="qa-who">我的回答</text>
+          <text class="qa-text">{{item.mineAnswer || '——'}}</text>
+        </view>
+        <view class="qa-answer">
+          <text class="qa-who">TA 的回答</text>
+          <text class="qa-text">{{item.partnerAnswer || '——'}}</text>
+        </view>
+      </view>
+    </view>
+
+  </block>
+
+</view>

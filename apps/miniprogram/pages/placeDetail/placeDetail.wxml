@@ -1,0 +1,51 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <block wx:elif="{{!place}}">
+    <view class="card">
+      <view class="title">地点详情</view>
+      <view class="muted">地点不存在或无权访问。</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card">
+      <view class="row">
+        <view class="title">{{place.title}}</view>
+        <text class="badge">{{typeLabel}}</text>
+      </view>
+      <view wx:if="{{place.address}}" class="row">
+        <text class="label">地址</text>
+        <text class="value">{{place.address}}</text>
+      </view>
+      <view wx:if="{{place.city}}" class="row">
+        <text class="label">城市</text>
+        <text class="value">{{place.city}}</text>
+      </view>
+      <view class="row">
+        <text class="label">坐标</text>
+        <text class="value">{{place.latitude}}, {{place.longitude}}</text>
+      </view>
+      <button class="btn ghost" bindtap="removePlace" disabled="{{deleting}}">{{deleting ? '删除中…' : '删除地点'}}</button>
+    </view>
+
+    <view class="card">
+      <view class="title">一起决定</view>
+      <view class="muted">和 TA 一起投票，看看要不要去。</view>
+      <view class="vote-row">
+        <button class="btn ghost vote-btn {{votes.mine === 'want' ? 'active' : ''}}" bindtap="vote" data-vote="want" disabled="{{voting}}">想去 {{votes.want}}</button>
+        <button class="btn ghost vote-btn {{votes.mine === 'meh' ? 'active' : ''}}" bindtap="vote" data-vote="meh" disabled="{{voting}}">一般 {{votes.meh}}</button>
+        <button class="btn ghost vote-btn {{votes.mine === 'no' ? 'active' : ''}}" bindtap="vote" data-vote="no" disabled="{{voting}}">不想去 {{votes.no}}</button>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="title">相关回忆</view>
+      <view wx:if="{{memories.length === 0}}" class="muted">这个地点还没有回忆。</view>
+      <view wx:for="{{memories}}" wx:key="id" class="list-item" bindtap="goMemory" data-id="{{item.id}}">
+        <view class="value">{{item.title}}</view>
+        <view class="muted">{{item.dateText}} · {{item.mediaCount}} 张照片</view>
+      </view>
+    </view>
+  </block>
+</view>

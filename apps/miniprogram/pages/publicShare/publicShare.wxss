@@ -1,0 +1,9 @@
+/* 公开分享：复用全局 app.wxss 中的通用样式 */
+
+.share-url {
+  display: block;
+  margin-top: 4rpx;
+  color: #544487;
+  font-size: 26rpx;
+  word-break: break-all;
+}

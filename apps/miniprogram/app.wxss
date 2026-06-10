@@ -37,6 +37,14 @@ page {
   color: #ffffff;
   border-radius: 999rpx;
   font-size: 30rpx;
+  transition: opacity 0.15s ease, transform 0.05s ease;
+}
+
+/* 按压反馈：微信小程序 button 的按下态通过 hover-class 触发，
+   这里同时支持 :active，保证未配置 hover-class 时也有反馈。 */
+.btn:active {
+  opacity: 0.85;
+  transform: scale(0.98);
 }
 
 .btn.ghost {
@@ -55,6 +63,11 @@ page {
 
 .btn[disabled] {
   opacity: 0.5;
+}
+
+.btn[disabled]:active {
+  opacity: 0.5;
+  transform: none;
 }
 
 .row {
@@ -114,4 +127,18 @@ page {
 
 .list-item:first-child {
   border-top: none;
+}
+
+/* ---- 小工具类（可选使用，纯增量，不影响既有布局） ---- */
+.center {
+  text-align: center;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #544487;
+  background: #efecfa;
 }

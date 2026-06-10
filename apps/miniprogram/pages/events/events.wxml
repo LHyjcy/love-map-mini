@@ -1,4 +1,9 @@
 <view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{!ready}}" class="card center">
+    <view class="muted">加载中…</view>
+  </view>
+
   <!-- 未登录 / 未绑定 -->
   <view wx:if="{{ready && !loggedIn}}" class="card center">
     <view class="title">日程</view>
@@ -21,12 +26,12 @@
       <picker class="picker" mode="date" value="{{form.eventDate}}" bindchange="onDate">
         <view class="picker-box">日期：{{form.eventDate || '请选择'}}</view>
       </picker>
-      <button class="btn" bindtap="createEvent">添加</button>
+      <button class="btn" bindtap="createEvent" disabled="{{submitting}}" loading="{{submitting}}">添加</button>
     </view>
 
     <view class="card">
       <view class="title">日程列表</view>
-      <view wx:if="{{events.length === 0}}" class="muted">还没有日程</view>
+      <view wx:if="{{events.length === 0}}" class="muted">还没有日程，添加一个纪念日或倒数日吧～</view>
       <view wx:for="{{events}}" wx:key="id" class="list-item">
         <view class="row">
           <text class="value">{{item.title}}</text>
@@ -34,7 +39,10 @@
         </view>
         <view class="row">
           <text class="muted">{{item.typeLabel}} · {{item.dateText}}</text>
-          <button class="btn mini ghost" data-id="{{item.id}}" bindtap="delEvent">删除</button>
+          <view class="item-actions">
+            <button class="btn mini" data-id="{{item.id}}" data-date="{{item.eventDate}}" bindtap="remindMe" disabled="{{remindingId === item.id}}">提醒我</button>
+            <button class="btn mini ghost" data-id="{{item.id}}" bindtap="delEvent" disabled="{{deletingId === item.id}}">删除</button>
+          </view>
         </view>
       </view>
     </view>

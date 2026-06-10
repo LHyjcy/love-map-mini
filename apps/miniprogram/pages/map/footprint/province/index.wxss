@@ -1,0 +1,69 @@
+.fp-canvas {
+  display: block;
+  margin: 16rpx auto;
+  background: #faf9fe;
+  border-radius: 16rpx;
+}
+
+.fp-hint {
+  text-align: center;
+  margin: 16rpx 0;
+}
+
+/* 悬浮立体感预览卡片：底部固定、圆角、白底、上方阴影，滑入动画 */
+.fp-preview {
+  position: fixed;
+  left: 24rpx;
+  right: 24rpx;
+  bottom: 32rpx;
+  background: #ffffff;
+  border-radius: 28rpx;
+  padding: 36rpx 32rpx 32rpx;
+  box-shadow: 0 -8rpx 32rpx rgba(84, 68, 135, 0.25);
+  transform: translateY(140%);
+  opacity: 0;
+  transition: transform 0.26s ease, opacity 0.26s ease;
+  z-index: 50;
+}
+
+.fp-preview--shown {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fp-preview-close {
+  position: absolute;
+  top: 20rpx;
+  right: 28rpx;
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  text-align: center;
+  color: #9a93b8;
+  font-size: 32rpx;
+}
+
+.fp-preview-name {
+  font-size: 38rpx;
+  font-weight: 600;
+  color: #2c2545;
+}
+
+.fp-preview-sub {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #8b85a6;
+}
+
+.fp-preview-btn {
+  margin-top: 28rpx;
+  background: #544487;
+  color: #ffffff;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  line-height: 2.6;
+}
+
+.fp-preview-btn::after {
+  border: none;
+}

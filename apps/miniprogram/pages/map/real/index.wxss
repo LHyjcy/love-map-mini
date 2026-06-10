@@ -1,0 +1,141 @@
+.map-page { position: relative; width: 100%; min-height: 100vh; background: #f5f4fb; }
+.map { width: 100%; }
+
+.state-wrap { padding: 32rpx 24rpx; }
+
+.empty-tip {
+  position: fixed;
+  left: 24rpx; right: 24rpx; bottom: 160rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  text-align: center;
+  box-shadow: 0 6rpx 24rpx rgba(84,68,135,0.18);
+}
+
+.map-size-btn {
+  position: fixed;
+  top: 24rpx;
+  right: 24rpx;
+  background: rgba(255,255,255,0.92);
+  color: #544487;
+  font-size: 24rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  box-shadow: 0 4rpx 12rpx rgba(84,68,135,0.15);
+}
+
+/* ===== 立体底部卡片 ===== */
+.bottom-card {
+  position: fixed;
+  left: 24rpx; right: 24rpx; bottom: 160rpx;
+  background: #fff;
+  /* 顶部圆角更大，营造从地图“升起”的卡片感 */
+  border-radius: 28rpx 28rpx 28rpx 28rpx;
+  overflow: hidden;
+  /* 强阴影 + 向上的投影，立体悬浮 */
+  box-shadow: 0 -8rpx 32rpx rgba(84,68,135,0.25);
+  /* slide-up 入场：默认下移并透明，加上一点点 perspective 让出现更有层次 */
+  transform: translateY(40rpx);
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+.bottom-card.is-shown {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.bc-close {
+  position: absolute;
+  top: 16rpx; right: 20rpx;
+  z-index: 3;
+  width: 48rpx; height: 48rpx;
+  line-height: 48rpx;
+  text-align: center;
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 999rpx;
+  background: rgba(0,0,0,0.32);
+}
+
+/* 封面照片区 */
+.cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 320rpx;
+  overflow: hidden;
+}
+.cover {
+  width: 100%;
+  height: 320rpx;
+  display: block;
+  /* 视差/立体：封面略微放大，入场时缓缓回到原尺寸，产生轻微 parallax 感 */
+  transform: scale(1.08);
+  transition: transform 0.6s ease;
+}
+.cover.cover-in { transform: scale(1.0); }
+
+/* 压在照片底部的渐变带 + 标题 */
+.cover-band {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 40rpx 24rpx 20rpx;
+  background: linear-gradient(transparent, rgba(0,0,0,0.5));
+}
+.cover-title {
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 700;
+  text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.45);
+}
+
+/* 无封面时的纯标题头 */
+.plain-head { padding: 28rpx 24rpx 4rpx; }
+
+.badge {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #544487;
+  background: #efeafa;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+.badge-on-cover {
+  color: #fff;
+  background: rgba(255,255,255,0.22);
+  margin-bottom: 8rpx;
+}
+
+.bc-title { font-size: 32rpx; font-weight: 600; color: #2a2540; margin: 12rpx 0 0; }
+
+/* 正文区 */
+.bc-body { padding: 20rpx 24rpx 4rpx; }
+.mem-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2a2540;
+  margin-bottom: 8rpx;
+}
+.mem-text {
+  font-size: 26rpx;
+  color: #6b647e;
+  line-height: 1.5;
+  /* 2 行截断 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.empty-mem { font-size: 26rpx; }
+
+.detail-btn { margin: 16rpx 24rpx 24rpx; }
+
+.muted { color: #9a93ad; font-size: 26rpx; }
+
+.fab-bar {
+  position: fixed;
+  left: 24rpx; right: 24rpx; bottom: 40rpx;
+  display: flex;
+  justify-content: space-between;
+}
+.fab { flex: 1; margin: 0 8rpx; line-height: 72rpx; font-size: 26rpx; }

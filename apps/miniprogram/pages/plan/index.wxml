@@ -1,0 +1,68 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+
+  <!-- 未登录 -->
+  <block wx:elif="{{!loggedIn}}">
+    <view class="card">
+      <view class="title">计划中心</view>
+      <view class="muted">登录后可管理想去的地方、约会计划与纪念日。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </block>
+
+  <!-- 未绑定情侣 -->
+  <block wx:elif="{{!bound}}">
+    <view class="card">
+      <view class="title">计划中心</view>
+      <view class="muted">绑定情侣关系后才能一起规划行程。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <!-- 想去清单 -->
+    <view class="card">
+      <view class="row">
+        <view class="title">想去清单</view>
+        <text class="muted" bindtap="goWishlist">查看全部 / 添加</text>
+      </view>
+      <view wx:if="{{wishlist.length === 0}}" class="muted">还没有想去的地方，添加一个吧～</view>
+      <view wx:for="{{wishlist}}" wx:key="id" class="list-item" bindtap="goWishlist">
+        <view class="value">{{item.title}}</view>
+        <view wx:if="{{item.address}}" class="muted">{{item.address}}</view>
+      </view>
+      <button class="btn ghost" bindtap="goAddPlace">＋ 添加想去地点</button>
+    </view>
+
+    <!-- 约会计划 -->
+    <view class="card">
+      <view class="row">
+        <view class="title">约会计划</view>
+        <text class="muted" bindtap="goPlanAdd">管理计划</text>
+      </view>
+      <view wx:if="{{plans.length === 0}}" class="muted">还没有约会计划，去新建一个吧～</view>
+      <view wx:for="{{plans}}" wx:key="id" class="list-item" bindtap="goPlanDetail" data-id="{{item.id}}">
+        <view class="value">{{item.title}}</view>
+        <view wx:if="{{item.address}}" class="muted">{{item.address}}</view>
+      </view>
+      <button class="btn ghost" bindtap="goPlanAdd">＋ 新建约会计划</button>
+    </view>
+
+    <!-- 即将到来 -->
+    <view class="card">
+      <view class="row">
+        <view class="title">即将到来</view>
+        <text class="muted" bindtap="goEvents">全部日程</text>
+      </view>
+      <view wx:if="{{upcoming.length === 0}}" class="muted">近期没有纪念日或日程。</view>
+      <view wx:for="{{upcoming}}" wx:key="id" class="list-item" bindtap="goEvents">
+        <view class="row">
+          <text class="value">{{item.title}}</text>
+          <text class="badge">{{item.countdown}}</text>
+        </view>
+        <view wx:if="{{item.dateText}}" class="muted">{{item.dateText}}</view>
+      </view>
+    </view>
+  </block>
+</view>

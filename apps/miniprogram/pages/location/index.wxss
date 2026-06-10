@@ -1,0 +1,5 @@
+.loc-page { width: 100%; }
+.loc-map { width: 100%; height: 45vh; }
+.panel { padding: 24rpx; }
+.privacy { background: #f5f4fb; }
+.btn.mini { display: inline-block; width: auto; margin: 8rpx 8rpx 0 0; padding: 0 28rpx; line-height: 64rpx; }

@@ -82,3 +82,62 @@
   color: #544487;
   border: 1rpx solid #d9d3f0;
 }
+
+/* 今日心情卡 */
+.mood-card {
+  margin-bottom: 24rpx;
+}
+.mood-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mood-row {
+  display: flex;
+  margin-top: 16rpx;
+}
+.mood-cell {
+  flex: 1;
+  text-align: center;
+}
+.mood-emoji {
+  font-size: 56rpx;
+  line-height: 1.2;
+}
+
+/* 通用入口行（情侣问答等） */
+.cell {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cell-main {
+  display: flex;
+  align-items: center;
+  font-size: 30rpx;
+  color: #333333;
+}
+.cell-ic {
+  font-size: 40rpx;
+  margin-right: 16rpx;
+}
+
+/* 快捷入口宫格 */
+.qe-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+.qe {
+  width: 25%;
+  box-sizing: border-box;
+  padding: 18rpx 0;
+  text-align: center;
+  color: #544487;
+  font-size: 24rpx;
+}
+.qe-ic {
+  font-size: 44rpx;
+  line-height: 1;
+  margin-bottom: 8rpx;
+}

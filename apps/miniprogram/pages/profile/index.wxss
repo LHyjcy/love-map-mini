@@ -1,0 +1,56 @@
+/* pages/profile/index.wxss — Love Map 小档案 */
+
+/* 居中态卡片内的按钮留出间距 */
+.center .btn {
+  margin-top: 24rpx;
+}
+
+/* 快捷 key 芯片区 */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
+.chip {
+  margin: 0;
+}
+
+.chip:active {
+  opacity: 0.7;
+}
+
+/* 问答卡片：温暖底色 */
+.qa-card {
+  margin-top: 20rpx;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, #fdeef2 0%, #f3eefb 100%);
+}
+
+.qa-card:first-child {
+  margin-top: 8rpx;
+}
+
+.qa-answer {
+  display: flex;
+  flex-direction: column;
+  padding: 10rpx 0;
+}
+
+.qa-answer + .qa-answer {
+  border-top: 1rpx solid rgba(84, 68, 135, 0.08);
+}
+
+.qa-who {
+  font-size: 24rpx;
+  color: #c2548c;
+  margin-bottom: 6rpx;
+}
+
+.qa-text {
+  font-size: 28rpx;
+  color: #2a2540;
+  line-height: 1.5;
+}

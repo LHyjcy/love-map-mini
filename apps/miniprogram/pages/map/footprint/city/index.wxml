@@ -1,0 +1,97 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+  <view wx:elif="{{loadError}}" class="muted">{{loadError}}</view>
+  <block wx:else>
+    <!-- 头部卡片：本城回忆与地点概览 -->
+    <view class="hero">
+      <view class="hero-title">这座城的回忆</view>
+      <view class="hero-sub">回忆 {{memories.length}} 段 · 地点 {{places.length}} 个</view>
+    </view>
+
+    <!-- 立体回忆相册 -->
+    <view wx:if="{{memories.length > 0}}" class="album">
+      <swiper
+        class="album-swiper"
+        previous-margin="48rpx"
+        next-margin="48rpx"
+        circular="{{false}}"
+        bindchange="onSwiperChange"
+      >
+        <swiper-item wx:for="{{memories}}" wx:key="id">
+          <view
+            class="mcard {{index === current ? 'mcard--active' : 'mcard--side'}}"
+            bindtap="goMemory"
+            data-id="{{item.id}}"
+          >
+            <!-- 封面 -->
+            <view
+              class="cover"
+              catchtap="previewPhotos"
+              data-photos="{{item.photos}}"
+              data-cover="{{item.cover}}"
+            >
+              <image wx:if="{{item.cover}}" class="cover-img" src="{{item.cover}}" mode="aspectFill" />
+              <view wx:else class="cover-ph">
+                <text class="cover-ph-emoji">{{item.moodEmoji}}</text>
+              </view>
+
+              <!-- 多图角标 -->
+              <view wx:if="{{item.photoCount > 1}}" class="photo-count">{{item.photoCount}} 张</view>
+
+              <!-- 标题渐变带 -->
+              <view class="cover-grad">
+                <text class="cover-title">{{item.title || '未命名回忆'}}</text>
+              </view>
+            </view>
+
+            <!-- 卡片正文 -->
+            <view class="mbody">
+              <view wx:if="{{item.content}}" class="mcontent">{{item.content}}</view>
+
+              <view wx:if="{{item.tagList.length > 0}}" class="tags">
+                <text wx:for="{{item.tagList}}" wx:for-item="tag" wx:key="*this" class="tag">{{tag}}</text>
+              </view>
+
+              <view class="mmeta">
+                <text class="mmeta-date">{{item.dateText}}</text>
+                <text wx:if="{{item.mood}}" class="mmeta-mood">{{item.moodEmoji}} {{item.mood}}</text>
+              </view>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+
+      <!-- 分页圆点 -->
+      <view class="dots">
+        <view
+          wx:for="{{memories}}"
+          wx:key="id"
+          class="dot {{index === current ? 'dot--on' : ''}}"
+        ></view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty">
+      <view class="empty-emoji">📷</view>
+      <view class="empty-title">这座城还没有回忆</view>
+      <view wx:if="{{places.length > 0}}" class="empty-hint">已经有 {{places.length}} 个地点啦，去写下第一条回忆吧～</view>
+      <view wx:else class="empty-hint">先去添加一个地点，再记录你们的故事吧～</view>
+    </view>
+
+    <!-- 紧凑地点列表 -->
+    <view wx:if="{{places.length > 0}}" class="card place-card">
+      <view class="title">地点（{{places.length}}）</view>
+      <view
+        wx:for="{{places}}"
+        wx:key="id"
+        class="list-item place-item"
+        bindtap="goPlace"
+        data-id="{{item.id}}"
+      >
+        <view class="value">{{item.title}}</view>
+        <view class="muted">{{item.placeType}}</view>
+      </view>
+    </view>
+  </block>
+</view>

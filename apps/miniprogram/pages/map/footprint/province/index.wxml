@@ -1,0 +1,27 @@
+<view class="container">
+  <view wx:if="{{!ready}}" class="muted">加载中…</view>
+  <block wx:else>
+    <view class="card">
+      <view class="title">足迹 · 省份</view>
+      <view class="muted">已点亮 {{litCityCount}} / {{cityCount}} 个城市</view>
+      <view wx:if="{{loading}}" class="muted fp-hint">正在加载城市地图…</view>
+      <view wx:elif="{{mapError}}" class="muted fp-hint">{{mapError}}</view>
+      <canvas
+        type="2d"
+        id="provcanvas"
+        class="fp-canvas"
+        style="width:{{canvasW}}px;height:{{canvasH}}px;"
+        bindtap="onTapMap"
+      ></canvas>
+      <view wx:if="{{!loading && !mapError}}" class="muted">点击点亮的城市，查看那里的回忆</view>
+    </view>
+
+    <view wx:if="{{preview}}" class="fp-preview {{previewShown ? 'fp-preview--shown' : ''}}">
+      <view class="fp-preview-close" catchtap="closePreview">✕</view>
+      <view class="fp-preview-name">{{preview.name}}</view>
+      <view wx:if="{{preview.hasCounts}}" class="fp-preview-sub">地点 {{preview.placeCount}} · 回忆 {{preview.memoryCount}}</view>
+      <view wx:else class="fp-preview-sub">你们在这里点亮了足迹</view>
+      <button class="fp-preview-btn" catchtap="goCity">查看这座城的回忆 ›</button>
+    </view>
+  </block>
+</view>

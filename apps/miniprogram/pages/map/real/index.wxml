@@ -1,0 +1,88 @@
+<view class="map-page">
+  <view wx:if="{{!ready}}" class="state-wrap"><view class="muted">加载中…</view></view>
+
+  <view wx:elif="{{!loggedIn}}" class="state-wrap">
+    <view class="card">
+      <view class="title">真实地图</view>
+      <view class="muted">登录后查看你们走过的每一个地点。</view>
+      <button class="btn" bindtap="goMe">去登录</button>
+    </view>
+  </view>
+
+  <view wx:elif="{{!bound}}" class="state-wrap">
+    <view class="card">
+      <view class="title">真实地图</view>
+      <view class="muted">绑定情侣关系后即可在地图上留下足迹。</view>
+      <button class="btn" bindtap="goMe">去绑定</button>
+    </view>
+  </view>
+
+  <block wx:else>
+    <map
+      class="map"
+      style="height:{{mapVh}}vh;"
+      latitude="{{latitude}}"
+      longitude="{{longitude}}"
+      markers="{{markers}}"
+      scale="12"
+      show-location
+      enable-zoom
+      enable-scroll
+      bindmarkertap="onMarkerTap"
+    ></map>
+
+    <!-- 调整地图大小 -->
+    <view class="map-size-btn" bindtap="toggleMapSize">⤢ 地图大小</view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{markers.length === 0}}" class="empty-tip">
+      <view class="bc-title">还没有标记</view>
+      <view class="muted">添加你们的第一个地点，或打卡此刻的所在。</view>
+    </view>
+
+    <!-- 立体底部卡片 -->
+    <view wx:if="{{selected}}" class="bottom-card {{cardShown ? 'is-shown' : ''}}">
+      <text class="bc-close" bindtap="closeCard">✕</text>
+
+      <!-- 有封面照片：照片 + 渐变带 + 标题压在图上 -->
+      <view wx:if="{{card.cover}}" class="cover-wrap">
+        <image class="cover {{cardShown ? 'cover-in' : ''}}" src="{{card.cover}}" mode="aspectFill"></image>
+        <view class="cover-band">
+          <text class="badge badge-on-cover">{{card.kindLabel}}</text>
+          <view class="cover-title">{{card.title}}</view>
+        </view>
+      </view>
+
+      <!-- 无封面：纯标题头 -->
+      <view wx:else class="plain-head">
+        <text class="badge">{{card.kindLabel}}</text>
+        <view class="bc-title">{{card.title}}</view>
+      </view>
+
+      <!-- 正文区 -->
+      <view class="bc-body">
+        <view wx:if="{{cardLoading}}" class="muted">加载回忆中…</view>
+
+        <block wx:elif="{{card.kind === 'place'}}">
+          <block wx:if="{{card.cover || card.memTitle || card.memText}}">
+            <view wx:if="{{card.memTitle}}" class="mem-title">{{card.memTitle}}</view>
+            <view wx:if="{{card.memText}}" class="mem-text">{{card.memText}}</view>
+          </block>
+          <view wx:else class="muted empty-mem">还没有回忆，去写一条 ✍️</view>
+        </block>
+
+        <view wx:elif="{{card.kind === 'checkin'}}" class="muted">此刻的所在地。</view>
+      </view>
+
+      <button wx:if="{{card.kind !== 'checkin'}}" class="btn detail-btn" bindtap="openDetail">查看详情</button>
+    </view>
+
+    <!-- 悬浮入口 -->
+    <view class="fab-bar">
+      <button class="btn fab" bindtap="goAddPlace">＋ 地点</button>
+      <button class="btn fab ghost" bindtap="goCheckin">打卡</button>
+      <button class="btn fab ghost" bindtap="goMemories">回忆</button>
+      <button class="btn fab ghost" bindtap="goShare">共享</button>
+    </view>
+  </block>
+</view>
