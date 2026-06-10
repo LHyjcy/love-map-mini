@@ -176,6 +176,12 @@ model Place {
   country   String?
   category  String?
 
+  // 足迹地图点亮用：行政区划 adcode（国标 6 位）。写入时由后端 reverseGeocode/名称字典归一化。
+  provinceId String?
+  cityId     String?
+  // 坐标系标注，默认 GCJ-02（高德/腾讯/微信内置 map 一致）。
+  coordType  String? @default("gcj02")
+
   placeType  PlaceType  @default(visited)
   visibility Visibility @default(couple)
 
@@ -208,6 +214,8 @@ model Memory {
   title      String
   content    String?    @db.Text
   mood       String?
+  // 标签：逗号分隔的归一化字符串（如 "旅行,吃饭"），用于筛选/统计（地图改造 ④）。
+  tags       String?
   memoryDate DateTime?
   visibility Visibility @default(couple)
 
@@ -264,6 +272,8 @@ model Checkin {
   longitude Decimal @db.Decimal(10, 7)
   address   String?
   accuracy  Float?
+  // 坐标系标注，默认 GCJ-02。
+  coordType String? @default("gcj02")
 
   shareScope ShareScope @default(self)
   expiresAt  DateTime?
@@ -444,4 +454,155 @@ model PublicShare {
 
   @@index([coupleId])
   @@index([createdById])
+}
+
+// ---------------------------------------------------------------------------
+// 位置共享（临时、可过期、可随时停止；非后台持续定位）
+// coupleId/userId 用标量 + 索引做越权隔离，鉴权在应用层（与现有查询风格一致）。
+// ---------------------------------------------------------------------------
+
+model LocationShareSession {
+  id         String    @id @default(cuid())
+  coupleId   String
+  userId     String
+  status     String    @default("active") // active | stopped | expired
+  mode       String    @default("temporary")
+  visibility String    @default("partner")
+  startedAt  DateTime  @default(now())
+  expiresAt  DateTime
+  stoppedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  points LocationPoint[]
+
+  @@index([coupleId, userId, status])
+  @@index([coupleId, status, expiresAt])
+}
+
+model LocationPoint {
+  id         String    @id @default(cuid())
+  sessionId  String
+  coupleId   String
+  userId     String
+  latitude   Decimal   @db.Decimal(10, 7)
+  longitude  Decimal   @db.Decimal(10, 7)
+  coordType  String    @default("gcj02")
+  accuracy   Float?
+  speed      Float?
+  heading    Float?
+  address    String?
+  clientTime DateTime?
+  serverTime DateTime  @default(now())
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  session LocationShareSession @relation(fields: [sessionId], references: [id])
+
+  @@index([coupleId, userId, createdAt])
+  @@index([sessionId])
+}
+
+// ---------------------------------------------------------------------------
+// 情感互动（今日心情 / 情侣问答）
+// 标量 coupleId/userId + 索引做越权隔离，鉴权在应用层。
+// ---------------------------------------------------------------------------
+
+model Mood {
+  id        String   @id @default(cuid())
+  coupleId  String
+  userId    String
+  mood      String   // happy | miss | tired | angry | hug | calm 等
+  note      String?
+  day       String   // 'YYYY-MM-DD'，服务端本地日，保证每人每天唯一
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([coupleId, userId, day])
+  @@index([coupleId, day])
+}
+
+model QaAnswer {
+  id          String   @id @default(cuid())
+  coupleId    String
+  userId      String
+  questionKey String   // 当日问题键（'YYYY-MM-DD'）
+  answer      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([coupleId, userId, questionKey])
+  @@index([coupleId, questionKey])
+}
+
+// 地点投票（想去地点：想去/一般/不想去）——地图改造 ⑥
+model PlaceVote {
+  id        String   @id @default(cuid())
+  coupleId  String
+  placeId   String
+  userId    String
+  vote      String   // want | meh | no
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([placeId, userId])
+  @@index([coupleId, placeId])
+}
+
+// 订阅消息提醒记录（真实下发）——地图改造 ⑦
+// 用户通过 wx.requestSubscribeMessage 授权后落库；到期由发送器读取并经微信下发。
+model ReminderSubscription {
+  id         String    @id @default(cuid())
+  coupleId   String
+  userId     String
+  templateId String
+  eventId    String?
+  remindAt   DateTime?
+  sentAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([coupleId, userId])
+  @@index([sentAt, remindAt])
+}
+
+// Love Map 档案：双方累积的「关于 TA」小事实（喜欢吃什么、想去哪、最近压力等）
+model ProfileFact {
+  id        String   @id @default(cuid())
+  coupleId  String
+  userId    String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([coupleId, userId, key])
+  @@index([coupleId, userId])
+}
+
+// 用户反馈（运营）
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  coupleId  String?
+  content   String   @db.Text
+  contact   String?
+  status    String   @default("open") // open | closed
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+}
+
+// 接口错误日志（运营：排查接口异常）
+model ErrorLog {
+  id         String   @id @default(cuid())
+  method     String
+  url        String
+  statusCode Int
+  code       String?
+  message    String?  @db.Text
+  userId     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([statusCode])
 }

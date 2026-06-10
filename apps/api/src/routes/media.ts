@@ -6,9 +6,12 @@
  * 这里只持久化客户端在上传完成后提供的照片元数据（fileUrl/objectKey 等），
  * 后端不负责文件的实际上传与存储。
  */
+import { promises as fs } from 'node:fs';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { config } from '../config.js';
 import { prisma } from '../db.js';
+import { diskFilePath } from '../services/storage.js';
 import { requireActiveCouple } from '../utils/couple.js';
 import { AppError } from '../utils/errors.js';
 import { success } from '../utils/response.js';
@@ -94,6 +97,19 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
       where: { id: media.id },
       data: { deletedAt: new Date() },
     });
+
+    // disk 模式下尽力物理删除磁盘文件，兑现“可删除照片”的隐私承诺（自托管场景）。
+    // 删除失败不影响接口结果：元数据已软删除，/files 也不再对外提供该照片。
+    if (config.storageProvider === 'disk' && media.objectKey) {
+      const filePath = diskFilePath(media.objectKey);
+      if (filePath) {
+        try {
+          await fs.unlink(filePath);
+        } catch {
+          // 文件可能已不存在或暂不可删，忽略
+        }
+      }
+    }
 
     return success({ id });
   });

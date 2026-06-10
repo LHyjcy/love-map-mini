@@ -1,0 +1,66 @@
+# love-map-mini —— 两人私用 / 自托管一键起服务（MySQL + API）。
+# 用法：
+#   1) 复制 .env：在本文件同级建 .env，至少填 MYSQL_ROOT_PASSWORD / JWT_SECRET（见下方注释）。
+#   2) docker compose up -d --build
+#   3) 首次建表：docker compose exec api npx prisma migrate deploy
+#   4) 后端在 http://<服务器IP>:3000 ；小程序 app.js 的 baseUrl 指向它（生产请走 HTTPS 反代）。
+#
+# 私用说明：照片用 STORAGE_PROVIDER=local 时不真正持久化；要存照片，配一个小 COS 桶（按量，两人几乎免费）。
+# 切勿提交真实密钥；本文件只读 .env。
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      # fail-closed：不再提供不安全的默认值，必须在 .env 中显式设置。
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请在 .env 中设置 MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: love_map_mini
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:?请在 .env 中设置 MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      DATABASE_URL: "mysql://root:${MYSQL_ROOT_PASSWORD:?请在 .env 中设置 MYSQL_ROOT_PASSWORD}@mysql:3306/love_map_mini"
+      # fail-closed：JWT_SECRET 必须显式设置（生产端 config.ts 还会拒绝占位/过短密钥）。
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 中设置 JWT_SECRET（≥16 位随机字符串）}
+      JWT_EXPIRES_IN: "7d"
+      # 两人私用：以下均可留空（微信登录/COS/AI 不配也能跑；登录用「体验登录+邀请码绑定」）。
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-local}
+      STORAGE_REGION: ${STORAGE_REGION:-}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID:-}
+      STORAGE_ACCESS_KEY_SECRET: ${STORAGE_ACCESS_KEY_SECRET:-}
+      STORAGE_PUBLIC_BASE_URL: ${STORAGE_PUBLIC_BASE_URL:-}
+      # disk provider 的照片落盘目录（挂到下方持久卷，容器重建后照片不丢）。
+      STORAGE_DISK_DIR: /app/uploads
+      PUBLIC_WEB_ORIGIN: ${PUBLIC_WEB_ORIGIN:-*}
+      AI_API_KEY: ${AI_API_KEY:-}
+    ports:
+      - "3000:3000"
+    volumes:
+      # 照片持久化：STORAGE_PROVIDER=disk 时照片存这里，随卷长期保留。
+      - api_uploads:/app/uploads
+
+volumes:
+  mysql_data:
+  api_uploads:

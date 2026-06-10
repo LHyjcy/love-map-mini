@@ -35,13 +35,43 @@ test('unknown route → 404 NOT_FOUND', async () => {
   assert.equal(res.json().error.code, 'NOT_FOUND');
 });
 
-for (const url of ['/api/me', '/api/places', '/api/dashboard', '/api/points/balance', '/api/public-shares']) {
+for (const url of ['/api/me', '/api/places', '/api/dashboard', '/api/points/balance', '/api/public-shares', '/api/export', '/api/co-checkin', '/api/notifications/templates', '/api/footprint/overview', '/api/geo/national', '/api/map/markers', '/api/location/status', '/api/location/partner/latest', '/api/map/distance?fromLat=1&fromLng=1&toLat=2&toLng=2', '/api/moods/today', '/api/qa/today', '/api/review', '/api/places/test-id/votes', '/api/profile', '/api/feedback']) {
   test(`GET ${url} without token → 401`, async () => {
     const res = await app.inject({ method: 'GET', url });
     assert.equal(res.statusCode, 401);
     assert.equal(res.json().error.code, 'UNAUTHORIZED');
   });
 }
+
+test('POST /api/notifications/subscribe without token → 401', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/notifications/subscribe',
+    payload: {},
+  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.json().error.code, 'UNAUTHORIZED');
+});
+
+test('POST /api/ai/memory-copy without token → 401', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/ai/memory-copy',
+    payload: {},
+  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.json().error.code, 'UNAUTHORIZED');
+});
+
+test('POST /api/account/delete without token → 401', async () => {
+  const res = await app.inject({
+    method: 'POST',
+    url: '/api/account/delete',
+    payload: {},
+  });
+  assert.equal(res.statusCode, 401);
+  assert.equal(res.json().error.code, 'UNAUTHORIZED');
+});
 
 test('POST /api/media/upload-credential without token → 401', async () => {
   const res = await app.inject({

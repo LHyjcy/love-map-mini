@@ -29,32 +29,32 @@ export async function dashboardRoutes(app: FastifyInstance): Promise<void> {
       ? Math.max(0, daysUntil(couple.togetherAt) * -1)
       : null;
 
-    const pointsBalance = await getBalance(couple.id, userId);
-
-    const recentMemories = await prisma.memory.findMany({
-      where: { coupleId: couple.id, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: { id: true, title: true, memoryDate: true },
-    });
-
-    const pendingTasks = await prisma.task.count({
-      where: {
-        coupleId: couple.id,
-        deletedAt: null,
-        status: { in: ['pending', 'accepted'] },
-      },
-    });
-
-    const events = await prisma.event.findMany({
-      where: {
-        coupleId: couple.id,
-        deletedAt: null,
-        eventDate: { gte: today0 },
-      },
-      orderBy: { eventDate: 'asc' },
-      take: 5,
-    });
+    // 四个查询互相独立，并行执行以缩短首页响应时间。
+    const [pointsBalance, recentMemories, pendingTasks, events] = await Promise.all([
+      getBalance(couple.id, userId),
+      prisma.memory.findMany({
+        where: { coupleId: couple.id, deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { id: true, title: true, memoryDate: true },
+      }),
+      prisma.task.count({
+        where: {
+          coupleId: couple.id,
+          deletedAt: null,
+          status: { in: ['pending', 'accepted'] },
+        },
+      }),
+      prisma.event.findMany({
+        where: {
+          coupleId: couple.id,
+          deletedAt: null,
+          eventDate: { gte: today0 },
+        },
+        orderBy: { eventDate: 'asc' },
+        take: 5,
+      }),
+    ]);
 
     const upcomingEvents = events.map((e) => ({
       id: e.id,

@@ -17,6 +17,35 @@ const acceptSchema = z.object({
   inviteCode: z.string().regex(/^\d{6}$/, 'inviteCode must be 6 digits'),
 });
 
+// 接受邀请的失败锁定：6 位数字邀请码空间有限，仅靠 IP 限流不足以挡住分布式暴力猜测。
+// 这里按"已登录用户"维度计失败次数：1 小时窗口内最多失败 10 次，超出直接 429。
+// 私用单实例部署用内存计数即可；进程重启清零可接受（攻击者也需重新积累配额）。
+const ACCEPT_FAIL_WINDOW_MS = 60 * 60 * 1000;
+const ACCEPT_FAIL_MAX = 10;
+const acceptFailures = new Map<string, { count: number; windowStart: number }>();
+
+function assertAcceptNotLocked(userId: string): void {
+  const state = acceptFailures.get(userId);
+  if (!state) return;
+  if (Date.now() - state.windowStart >= ACCEPT_FAIL_WINDOW_MS) {
+    acceptFailures.delete(userId);
+    return;
+  }
+  if (state.count >= ACCEPT_FAIL_MAX) {
+    throw new AppError('TOO_MANY_ATTEMPTS', '尝试次数过多，请稍后再试', 429);
+  }
+}
+
+function recordAcceptFailure(userId: string): void {
+  const now = Date.now();
+  const state = acceptFailures.get(userId);
+  if (!state || now - state.windowStart >= ACCEPT_FAIL_WINDOW_MS) {
+    acceptFailures.set(userId, { count: 1, windowStart: now });
+    return;
+  }
+  state.count += 1;
+}
+
 type PublicPartner = {
   id: string;
   nickname: string;
@@ -119,6 +148,8 @@ export async function coupleRoutes(app: FastifyInstance): Promise<void> {
   // 接受邀请码完成绑定。
   app.post('/api/couples/accept', { preHandler: [app.authenticate] }, async (request) => {
     const userId = request.user.sub;
+    // 防暴力猜码：失败次数超限的用户直接拒绝，不再查库。
+    assertAcceptNotLocked(userId);
     const { inviteCode } = parse(acceptSchema, request.body);
 
     const active = await getActiveCoupleForUser(userId);
@@ -128,9 +159,11 @@ export async function coupleRoutes(app: FastifyInstance): Promise<void> {
 
     const couple = await prisma.couple.findUnique({ where: { inviteCode } });
     if (!couple || couple.status !== 'pending' || couple.userBId) {
+      recordAcceptFailure(userId);
       throw new AppError('INVITE_INVALID', 'Invite code is invalid or already used.', 404);
     }
     if (couple.inviteExpiresAt && couple.inviteExpiresAt.getTime() < Date.now()) {
+      recordAcceptFailure(userId);
       throw new AppError('INVITE_EXPIRED', 'Invite code has expired.', 410);
     }
     if (couple.userAId === userId) {
@@ -147,6 +180,8 @@ export async function coupleRoutes(app: FastifyInstance): Promise<void> {
       },
     });
 
+    // 绑定成功，清空失败计数。
+    acceptFailures.delete(userId);
     return success({ couple: toCoupleView(updated) });
   });
 

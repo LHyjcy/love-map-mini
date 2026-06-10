@@ -6,6 +6,7 @@
 import fastifyJwt from '@fastify/jwt';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { config } from '../config.js';
+import { prisma } from '../db.js';
 import { AppError } from '../utils/errors.js';
 
 export interface AuthTokenPayload {
@@ -29,6 +30,16 @@ async function authenticateHandler(request: FastifyRequest, _reply: FastifyReply
   try {
     await request.jwtVerify();
   } catch {
+    throw new AppError('UNAUTHORIZED', 'Authentication required or token invalid.', 401);
+  }
+
+  // 注销后令牌立即失效：JWT 只校验签名，账号软删除后令牌仍在有效期内，
+  // 故每次请求用一次主键查询确认用户存在且未被软删除（开销极小）。
+  const user = await prisma.user.findUnique({
+    where: { id: request.user.sub },
+    select: { deletedAt: true },
+  });
+  if (!user || user.deletedAt) {
     throw new AppError('UNAUTHORIZED', 'Authentication required or token invalid.', 401);
   }
 }

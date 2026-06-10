@@ -7,6 +7,7 @@ import type { Prisma } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '../db.js';
+import { resolveAdcode } from '../services/adcode.js';
 import { requireActiveCouple } from '../utils/couple.js';
 import { AppError } from '../utils/errors.js';
 import { success } from '../utils/response.js';
@@ -45,6 +46,8 @@ const updatePlaceSchema = z.object({
 
 const listQuerySchema = z.object({
   placeType: placeTypeSchema.optional(),
+  city: z.string().optional(),
+  year: z.string().optional(),
 });
 
 type PlaceRow = {
@@ -59,6 +62,9 @@ type PlaceRow = {
   province: string | null;
   country: string | null;
   category: string | null;
+  provinceId: string | null;
+  cityId: string | null;
+  coordType: string | null;
   placeType: string;
   visibility: string;
   visitedAt: Date | null;
@@ -81,6 +87,9 @@ function toPlaceView(p: PlaceRow) {
     province: p.province,
     country: p.country,
     category: p.category,
+    provinceId: p.provinceId,
+    cityId: p.cityId,
+    coordType: p.coordType,
     placeType: p.placeType,
     visibility: p.visibility,
     visitedAt: p.visitedAt,
@@ -95,6 +104,9 @@ export async function placeRoutes(app: FastifyInstance): Promise<void> {
     const userId = request.user.sub;
     const couple = await requireActiveCouple(userId);
     const body = parse(createPlaceSchema, request.body);
+
+    // 由省/市名称归一化出行政区划 adcode（足迹地图点亮用），仅在解析成功时写入。
+    const { provinceId, cityId } = resolveAdcode({ province: body.province, city: body.city });
 
     const place = await prisma.place.create({
       data: {
@@ -111,49 +123,42 @@ export async function placeRoutes(app: FastifyInstance): Promise<void> {
         ...(body.placeType !== undefined ? { placeType: body.placeType } : {}),
         ...(body.visibility !== undefined ? { visibility: body.visibility } : {}),
         ...(body.visitedAt !== undefined ? { visitedAt: new Date(body.visitedAt) } : {}),
+        ...(provinceId !== null ? { provinceId } : {}),
+        ...(cityId !== null ? { cityId } : {}),
       },
     });
 
     return success({ place: toPlaceView(place) });
   });
 
-  // 列出当前情侣的地点，可按 placeType 过滤，按创建时间倒序。
+  // 列出当前情侣的地点，可按 placeType / city / year 过滤，按创建时间倒序。
   app.get('/api/places', { preHandler: [app.authenticate] }, async (request) => {
     const userId = request.user.sub;
     const couple = await requireActiveCouple(userId);
-    const { placeType } = parse(listQuerySchema, request.query);
+    const { placeType, city, year } = parse(listQuerySchema, request.query);
+
+    // year 仅在为合法 4 位年份时才生效，按自然年过滤 visitedAt。
+    const parsedYear = year !== undefined && /^\d{4}$/.test(year) ? Number(year) : undefined;
 
     const rows = await prisma.place.findMany({
       where: {
         coupleId: couple.id,
         deletedAt: null,
         ...(placeType !== undefined ? { placeType } : {}),
+        ...(city !== undefined && city !== '' ? { city: { contains: city } } : {}),
+        ...(parsedYear !== undefined
+          ? {
+              visitedAt: {
+                gte: new Date(parsedYear, 0, 1),
+                lt: new Date(parsedYear + 1, 0, 1),
+              },
+            }
+          : {}),
       },
       orderBy: { createdAt: 'desc' },
     });
 
     return success({ places: rows.map(toPlaceView) });
-  });
-
-  // 地图标记轻量列表：仅返回绘制 marker 所需字段。
-  app.get('/api/places/markers', { preHandler: [app.authenticate] }, async (request) => {
-    const userId = request.user.sub;
-    const couple = await requireActiveCouple(userId);
-
-    const rows = await prisma.place.findMany({
-      where: { coupleId: couple.id, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    const markers = rows.map((p) => ({
-      id: p.id,
-      title: p.title,
-      latitude: Number(p.latitude),
-      longitude: Number(p.longitude),
-      placeType: p.placeType,
-    }));
-
-    return success({ markers });
   });
 
   // 单个地点详情，越权或不存在均返回 404。
@@ -186,6 +191,9 @@ export async function placeRoutes(app: FastifyInstance): Promise<void> {
       throw new AppError('NOT_FOUND', 'Place not found.', 404);
     }
 
+    // 仅当本次请求带来可解析的省/市时才更新 adcode，避免把已有值清空。
+    const { provinceId, cityId } = resolveAdcode({ province: body.province, city: body.city });
+
     const place = await prisma.place.update({
       where: { id },
       data: {
@@ -200,6 +208,8 @@ export async function placeRoutes(app: FastifyInstance): Promise<void> {
         ...(body.placeType !== undefined ? { placeType: body.placeType } : {}),
         ...(body.visibility !== undefined ? { visibility: body.visibility } : {}),
         ...(body.visitedAt !== undefined ? { visitedAt: new Date(body.visitedAt) } : {}),
+        ...(provinceId !== null ? { provinceId } : {}),
+        ...(cityId !== null ? { cityId } : {}),
       },
     });
 

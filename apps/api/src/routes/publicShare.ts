@@ -9,6 +9,8 @@ import { Prisma } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '../db.js';
+import { assertTextAllowed } from '../services/contentSec.js';
+import { recordConsentGranted } from '../utils/consent.js';
 import { requireActiveCouple } from '../utils/couple.js';
 import { AppError } from '../utils/errors.js';
 import { success } from '../utils/response.js';
@@ -32,7 +34,8 @@ async function createShareWithUniqueCode(coupleId: string, createdById: string, 
           coupleId,
           createdById,
           title,
-          enabled: true,
+          // 隐私优先：公开分享默认关闭，需用户显式「开启分享」后才对外可见。
+          enabled: false,
           shareCode: genShareCode(),
         },
       });
@@ -56,6 +59,9 @@ export async function publicShareRoutes(app: FastifyInstance): Promise<void> {
     const userId = request.user.sub;
     const couple = await requireActiveCouple(userId);
     const { title } = parse(createSchema, request.body);
+
+    // UGC 内容安全审核（未配微信时放行）。
+    await assertTextAllowed(title);
 
     const share = await createShareWithUniqueCode(couple.id, userId, title);
 
@@ -115,6 +121,9 @@ export async function publicShareRoutes(app: FastifyInstance): Promise<void> {
       where: { id: existing.id },
       data: { enabled: true, disabledAt: null },
     });
+
+    // 行为即授权：显式开启公开地图属于明确同意，补记 public_share 授权台账（失败不阻断）。
+    await recordConsentGranted(userId, 'public_share').catch(() => {});
 
     return success({ share });
   });

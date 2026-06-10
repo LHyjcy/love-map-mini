@@ -7,6 +7,8 @@
  * - 不做后台持续定位，没有任何自动上报；每次打卡都由用户主动发起。
  * - shareScope 默认为 'self'，即默认仅本人可见，不向伴侣暴露位置。
  * - 伴侣位置仅当某条打卡 shareScope 为 'partner' 或 'memory'，且未过期（expiresAt 为空或在未来）时才可见。
+ * - shareScope='partner' 且未指定有效期时，默认 120 分钟后过期，避免位置被无限期可见；
+ *   shareScope='memory'（保存为共同回忆）是用户显式的永久动作，不套默认过期。
  * - 用户可随时软删除自己的打卡记录。
  */
 import type { Prisma } from '@prisma/client';
@@ -18,8 +20,13 @@ import { AppError } from '../utils/errors.js';
 import { haversineMeters } from '../utils/geo.js';
 import { success } from '../utils/response.js';
 import { parse } from '../utils/validation.js';
+import { recordConsentGranted } from '../utils/consent.js';
 
 const shareScopeSchema = z.enum(['self', 'partner', 'memory']);
+
+// shareScope='partner' 且未指定 shareTtlMinutes 时的默认共享有效期（分钟），
+// 防止伴侣位置因 expiresAt 为空而被无限期可见。
+const DEFAULT_PARTNER_SHARE_TTL_MINUTES = 120;
 
 const createCheckinSchema = z.object({
   latitude: z.number().min(-90).max(90),
@@ -80,13 +87,19 @@ export async function checkinRoutes(app: FastifyInstance): Promise<void> {
       }
     }
 
-    // 仅当向伴侣共享（partner/memory）且给定有效期时才计算过期时间；否则不设过期。
+    // 过期时间规则：
+    // - shareScope='partner'：用调用方给定的有效期；未给定时默认 120 分钟，避免位置无限期可见。
+    // - shareScope='memory'：仅在显式给定有效期时设置；保存为共同回忆是显式的永久动作，不套默认过期。
+    // - shareScope='self'：仅本人可见，不设过期。
     const shareScope = body.shareScope ?? 'self';
+    let ttlMinutes: number | undefined;
+    if (shareScope === 'partner') {
+      ttlMinutes = body.shareTtlMinutes ?? DEFAULT_PARTNER_SHARE_TTL_MINUTES;
+    } else if (shareScope === 'memory') {
+      ttlMinutes = body.shareTtlMinutes;
+    }
     const expiresAt =
-      (shareScope === 'partner' || shareScope === 'memory') &&
-      body.shareTtlMinutes !== undefined
-        ? new Date(Date.now() + body.shareTtlMinutes * 60000)
-        : null;
+      ttlMinutes !== undefined ? new Date(Date.now() + ttlMinutes * 60000) : null;
 
     const checkin = await prisma.checkin.create({
       data: {
@@ -101,6 +114,11 @@ export async function checkinRoutes(app: FastifyInstance): Promise<void> {
         ...(body.accuracy !== undefined ? { accuracy: body.accuracy } : {}),
       },
     });
+
+    // 行为即授权：向伴侣共享位置属于显式同意，补记 location 授权台账（失败不阻断打卡）。
+    if (shareScope !== 'self') {
+      await recordConsentGranted(userId, 'location').catch(() => {});
+    }
 
     return success({ checkin: toCheckinView(checkin) });
   });
