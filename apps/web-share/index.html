@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>情侣地图 · 公开分享</title>
+
+    <!-- Leaflet 1.9.x via unpkg CDN -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1 id="share-title">情侣地图</h1>
+      <p class="privacy-note">坐标已做模糊处理，仅展示公开内容</p>
+    </header>
+
+    <!-- 友好的错误提示，默认隐藏 -->
+    <div id="error-banner" class="error-banner" hidden>分享不存在或已关闭</div>
+
+    <main class="app-main">
+      <div class="view-toggle" role="tablist" aria-label="地图视图切换">
+        <button id="tab-markers" class="view-tab is-active" type="button" role="tab" aria-selected="true">
+          地点地图
+        </button>
+        <button id="tab-footprint" class="view-tab" type="button" role="tab" aria-selected="false">
+          足迹地图
+        </button>
+      </div>
+
+      <div id="map" class="map"></div>
+
+      <p id="footprint-caption" class="footprint-caption" hidden></p>
+
+      <section class="panel">
+        <div class="panel-block">
+          <h2>地点 <span id="places-count" class="count">0</span></h2>
+          <ul id="places-list" class="list"></ul>
+        </div>
+        <div class="panel-block">
+          <h2>回忆 <span id="memories-count" class="count">0</span></h2>
+          <ul id="memories-list" class="list"></ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p class="privacy-note">坐标已做模糊处理，仅展示公开内容</p>
+    </footer>
+
+    <!-- Leaflet JS via unpkg CDN -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <!-- 运行时部署配置：必须在 app.js 之前加载 -->
+    <script src="config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
