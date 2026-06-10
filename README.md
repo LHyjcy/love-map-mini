@@ -13,7 +13,7 @@ love-map-mini/
 ├─ apps/
 │  ├─ miniprogram/        # 微信原生小程序
 │  ├─ api/                # Node.js + TypeScript + Fastify 后端
-│  └─ web-share/          # 可选：公开地图分享页（MVP 暂为骨架）
+│  └─ web-share/          # 公开地图分享页（Leaflet 静态站，已实现；部署见 docs/DEPLOYMENT.md §8）
 ├─ packages/
 │  └─ shared/             # 共享类型、枚举、校验
 ├─ database/

@@ -215,3 +215,56 @@ Stop and ask for human confirmation before:
 - adding background location tracking
 - committing or printing real secrets
 - changing product scope from private couple app to public social app
+
+# Claude Code workflow
+
+## Codex plugin
+- Use `/codex:review --background` after meaningful code changes.
+- Use `/codex:adversarial-review --background` before PRs, migrations, auth/security changes, database changes, dependency upgrades, or risky refactors.
+- Use `/codex:status` to check background Codex jobs.
+- Use `/codex:result` to retrieve finished Codex results.
+- Use `/codex:rescue` only when stuck or when a second independent agent should attempt a solution.
+
+## ccusage
+- For usage or cost checks, run:
+  - `ccu-all`
+  - `ccu-claude`
+  - `ccu-codex`
+  - `ccu-blocks`
+- Prefer compact summaries unless I ask for detailed tables.
+
+## Safety
+- Never print, store, or commit credentials.
+- Never commit `.env`, auth files, token files, local MCP configs with secrets, or private logs.
+- Before destructive operations, explain the action and ask for confirmation.
+- Keep changes small and reviewable.
+
+# Claude Code statusline
+
+This project uses `ccstatusline` for Claude Code status-line display.
+
+Preferred visible fields:
+- model
+- current directory or git root
+- git branch
+- git clean/dirty status
+- context percentage
+- session cost
+- block timer
+- weekly/session usage
+- token usage
+- compaction counter when available
+
+Rules:
+- Keep the statusline readable and compact.
+- Prefer pinned `ccstatusline` command over auto-running `ccstatusline@latest`.
+- If Powerline symbols render incorrectly, switch to a minimal ASCII theme.
+- Do not remove Codex plugin or ccusage when editing Claude Code settings.
+
+Useful commands:
+- `ccstatusline`
+- `npx -y ccstatusline@latest`
+- `bunx -y ccstatusline@latest`
+- `ccu-all`
+- `ccu-claude`
+- `ccu-codex`
