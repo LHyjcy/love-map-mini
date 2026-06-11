@@ -291,6 +291,8 @@ model Checkin {
   @@index([placeId])
   // 查询 partner 最近一次有效共享位置
   @@index([coupleId, shareScope, expiresAt])
+  // 我的打卡列表 / 双人对比按时间倒序分页
+  @@index([coupleId, userId, createdAt])
 }
 
 model Task {

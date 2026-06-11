@@ -63,7 +63,8 @@
 位置打卡。`userId`、可选 `placeId`、经纬度、`address`、`accuracy`、`shareScope`
 （默认 self）、`expiresAt`（临时共享过期），软删除。**无后台定位**。
 **地图改造新增（Phase 2）**：`coordType`（坐标系标注，默认 `gcj02`）。
-> 索引：coupleId、userId、placeId、**(coupleId, shareScope, expiresAt)**（查 partner 最近有效位置）。
+> 索引：coupleId、userId、placeId、**(coupleId, shareScope, expiresAt)**（查 partner 最近有效位置）、
+> **(coupleId, userId, createdAt)**（打卡列表/双人对比按时间倒序分页）。
 
 ### Task
 任务。`creatorId`、`assigneeId`、`title`、`description`、`points`、`status`
