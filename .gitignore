@@ -48,3 +48,6 @@ apps/api/uploads/
 CLAUDE.md.backup.*
 apps/api/.*.out
 apps/api/.*.err
+
+# 备份产物（scripts/backup.sh 输出，含私密数据）— 绝不入库
+backups/

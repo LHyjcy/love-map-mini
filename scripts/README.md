@@ -2,6 +2,20 @@
 
 Helper scripts for love-map-mini.
 
+## backup.sh
+
+服务器（docker compose 部署）每日备份脚本：MySQL 全量 dump（gzip）+ 照片目录
+`/app/uploads`（tar.gz）→ `backups/<时间戳>/`，自动校验完整性、清理过期备份
+（默认保留 14 天），可选 `BACKUP_SYNC_CMD` 异地同步。
+
+```sh
+./scripts/backup.sh
+# cron: 30 3 * * * /opt/love-map/scripts/backup.sh >> /var/log/love-map-backup.log 2>&1
+```
+
+环境变量：`BACKUP_DIR` / `BACKUP_KEEP_DAYS` / `BACKUP_SYNC_CMD`。
+恢复方法见 `docs/SERVER_SETUP.md`「日常运维」。
+
 ## verify-cos.mjs
 
 Standalone connectivity check for Tencent Cloud COS direct upload.

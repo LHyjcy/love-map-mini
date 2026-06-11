@@ -49,7 +49,7 @@
    STORAGE_PUBLIC_BASE_URL=https://你的API域名     # 用于拼 /api/media/upload 与 /files 地址
    ```
    照片直接存在服务器磁盘（compose 已挂 `api_uploads` 持久卷到 `/app/uploads`，容器重建不丢）。
-   - 备份照片卷：`docker run --rm -v <项目名>_api_uploads:/data -v $PWD:/backup alpine tar czf /backup/uploads.tgz -C /data .`（卷名前缀=compose 项目名，`docker volume ls` 可查）。
+   - 备份：用 `scripts/backup.sh`（数据库 + 照片一起备，见 `docs/SERVER_SETUP.md`「日常运维」）。
    - 也可改用 COS：`STORAGE_PROVIDER=cos` + `STORAGE_*` + 桶 CORS，跑 `node --env-file=apps/api/.env scripts/verify-cos.mjs` 验证。
 5. **小程序后台「开发管理→服务器域名」** 配合法域名（均 HTTPS/wss）：
    - `request` = 你的 API 域名；`socket` = wss（你的 API 域名）；
@@ -77,6 +77,6 @@
 - [ ] 小程序后台配合法域名（request/socket/uploadFile 均填 API 域名）+ `baseUrl` 改生产域名 + `enableDevLogin=false`
 - [ ] 上传体验版 + 加女朋友为体验成员
 - [ ] 两人微信打开体验版 → 绑定 → 开始记录 ❤️
-- [ ] 定期备份：MySQL（`mysqldump`）+ 照片卷（`api_uploads`）
+- [ ] 定期备份：`scripts/backup.sh` 挂 cron（数据库 + 照片，详见 `docs/SERVER_SETUP.md`）
 
 > 费用量级：域名约几十元/年 + 轻量服务器约几十元/月。照片走 disk 时**无对象存储费用**。其余全免费、无需审核。

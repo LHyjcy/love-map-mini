@@ -99,10 +99,31 @@ curl https://api.example.com/health                 # 外网 HTTPS 通
 docker compose logs -f api          # 看后端日志
 docker compose pull && docker compose up -d --build   # 更新代码后重建
 docker compose exec api npx prisma migrate deploy      # 有 schema 变更时
-# 备份：数据库
-docker compose exec mysql sh -c 'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" love_map_mini' > db_backup.sql
-# 备份：照片卷（卷名前缀 = compose 项目名，docker volume ls 可查，通常是 love-map_api_uploads）
-docker run --rm -v love-map_api_uploads:/data -v "$PWD":/backup alpine tar czf /backup/uploads.tgz -C /data .
+```
+
+### 备份（每日自动，强烈建议）
+
+仓库自带 `scripts/backup.sh`：一次备份**数据库 dump（gzip）+ 照片目录（tar.gz）**到
+`backups/<时间戳>/`，自动校验完整性并清理过期备份（默认保留 14 天）。
+
+```bash
+chmod +x scripts/backup.sh
+./scripts/backup.sh                                  # 手动跑一次验证
+crontab -e                                           # 加一行，每天 03:30 自动备份：
+# 30 3 * * * /opt/love-map/scripts/backup.sh >> /var/log/love-map-backup.log 2>&1
+```
+
+可选环境变量：`BACKUP_DIR`（输出目录）、`BACKUP_KEEP_DAYS`（保留天数）、
+`BACKUP_SYNC_CMD`（备份后异地同步命令，如 `rclone copy ... <远端>`；服务器盘坏时
+只有异地副本能救命，强烈建议配置）。
+
+### 恢复（⚠️ 覆盖现有数据，操作前先确认）
+
+```bash
+# 恢复数据库
+gunzip -c backups/<时间戳>/db.sql.gz | docker compose exec -T mysql sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" love_map_mini'
+# 恢复照片
+docker compose exec -T api tar xzf - -C /app/uploads < backups/<时间戳>/uploads.tgz
 ```
 
 ---
