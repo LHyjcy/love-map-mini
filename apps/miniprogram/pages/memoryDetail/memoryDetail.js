@@ -1,6 +1,7 @@
 // pages/memoryDetail/memoryDetail.js
 // 回忆详情：展示标题、心情、内容、日期与照片，可预览图片、软删除回忆。
 const api = require('../../utils/api.js')
+const { thumbUrl } = require('../../utils/image.js')
 
 const VIS_LABEL = { private: '仅自己', couple: '双方可见', public: '可公开' }
 
@@ -39,7 +40,10 @@ Page({
   load() {
     api.get('/api/memories/' + this.data.memoryId).then((data) => {
       const memory = (data && data.memory) || null
-      const media = memory ? (memory.media || []) : []
+      // 网格小图加 thumb 字段（缩略图）；fileUrl 原图保留给预览与头图。
+      const media = (memory ? (memory.media || []) : []).map((m) =>
+        Object.assign({}, m, { thumb: m && m.fileUrl ? thumbUrl(m.fileUrl) : '' })
+      )
       const coverUrl = (media[0] && media[0].fileUrl) || ''
       this.setData({
         memory,

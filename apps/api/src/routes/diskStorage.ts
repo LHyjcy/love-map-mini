@@ -15,6 +15,7 @@ import {
   diskFilePath,
   contentTypeForKey,
 } from '../services/storage.js';
+import { ensureThumb } from '../services/thumbnails.js';
 import { success, failure } from '../utils/response.js';
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -90,6 +91,8 @@ export function registerDiskStorage(app: FastifyInstance): void {
       }
       await fs.mkdir(path.dirname(target), { recursive: true });
       await fs.writeFile(target, body);
+      // 异步预生成缩略图，不阻塞上传响应；失败无害（读取时会惰性重试）。
+      void ensureThumb(key);
       return success({ ok: true, objectKey: key, size: body.length });
     }
   );
@@ -97,7 +100,12 @@ export function registerDiskStorage(app: FastifyInstance): void {
   // 静态返回图片（私用场景，objectKey 不可猜）。
   app.get('/files/*', async (request, reply) => {
     const objectKey = (request.params as { '*'?: string })['*'] ?? '';
-    const target = objectKey ? diskFilePath(objectKey) : null;
+    // 正常 objectKey 不含点开头的路径段；拒绝可避免经 /files/.thumbs/<key>
+    // 绕过下方按真实 objectKey 做的软删除检查。
+    if (!objectKey || objectKey.split('/').some((seg) => seg.startsWith('.'))) {
+      return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
+    }
+    const target = diskFilePath(objectKey);
     if (!target) {
       return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
     }
@@ -111,6 +119,39 @@ export function registerDiskStorage(app: FastifyInstance): void {
       const buf = await fs.readFile(target);
       reply.header('Cache-Control', 'private, max-age=31536000');
       reply.header('X-Content-Type-Options', 'nosniff');
+      reply.type(contentTypeForKey(objectKey));
+      return reply.send(buf);
+    } catch {
+      return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
+    }
+  });
+
+  // 缩略图（列表/卡片用小图）：已有直接返回；没有则从原图惰性生成；
+  // 生成失败（历史坏图等）回退原图，保证老照片始终可显示。
+  app.get('/thumbs/*', async (request, reply) => {
+    const objectKey = (request.params as { '*'?: string })['*'] ?? '';
+    if (!objectKey || objectKey.split('/').some((seg) => seg.startsWith('.'))) {
+      return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
+    }
+    const target = diskFilePath(objectKey);
+    if (!target) {
+      return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
+    }
+    // 与 /files 相同的软删除检查（按原图 objectKey 查元数据）。
+    const media = await prisma.media.findFirst({ where: { objectKey } });
+    if (media && media.deletedAt !== null) {
+      return reply.status(404).send(failure('NOT_FOUND', 'File not found'));
+    }
+    try {
+      const thumbPath = await ensureThumb(objectKey);
+      reply.header('Cache-Control', 'private, max-age=31536000');
+      reply.header('X-Content-Type-Options', 'nosniff');
+      if (thumbPath) {
+        const buf = await fs.readFile(thumbPath);
+        reply.type('image/jpeg'); // 缩略图统一 JPEG 输出
+        return reply.send(buf);
+      }
+      const buf = await fs.readFile(target);
       reply.type(contentTypeForKey(objectKey));
       return reply.send(buf);
     } catch {

@@ -238,6 +238,7 @@
 | POST | `/api/media/upload-credential` | 签发图片上传凭证（mimeType 必填；限图片类型、≤10MB） |
 | PUT | `/api/media/upload?key&exp&sig` | **仅 disk 模式**：接收原始图片字节（HMAC 短时签名鉴权，非 JWT） |
 | GET | `/files/*` | **仅 disk 模式**：读取已存图片（objectKey 不可猜；已删除照片返回 404） |
+| GET | `/thumbs/*` | **仅 disk 模式**：读取缩略图（最长边 640px JPEG；列表/卡片场景用） |
 | POST | `/api/media` | 新建（memoryId、fileUrl、objectKey、mimeType 必填；须属于本情侣的 memory） |
 | GET | `/api/media?memoryId=...` | 某回忆的照片列表（按 sortOrder 升序） |
 | DELETE | `/api/media/:id` | 软删除 |
@@ -286,7 +287,11 @@
   指定落盘目录。上传端校验：签名无效/过期 `403 UPLOAD_FORBIDDEN`、对象键非法 `400 BAD_OBJECT_KEY`、
   空内容 `400 EMPTY_BODY`、魔数与图片类型不符 `400 INVALID_IMAGE`、重复上传同一对象键
   `409 ALREADY_UPLOADED`、超限 `413 FILE_TOO_LARGE`。读取端：`Cache-Control: private`，
-  软删除的照片立即 404（disk 模式下删除元数据时同时尽力删除磁盘文件）。
+  软删除的照片立即 404（disk 模式下删除元数据时同时尽力删除磁盘文件与缩略图）。
+  **缩略图**：`GET /thumbs/<objectKey>` 返回最长边 640px 的 JPEG（sharp 生成，EXIF 方向已矫正、
+  透明铺白）；上传后异步预生成，历史照片首次请求时惰性生成；原图缺失/不可解码时回退返回原图。
+  小程序端约定：列表/卡片用 `/thumbs/`，详情大图与 `wx.previewImage` 用 `/files/` 原图
+  （`utils/image.js` 的 `thumbUrl()`，非 disk 链接原样返回）。
 - `maxBytes` 上限 **10MB（10485760）**；超限由对象存储侧/后续校验拒绝。
 - **存储访问密钥 `STORAGE_ACCESS_KEY_ID` / `STORAGE_ACCESS_KEY_SECRET` 仅从服务端环境变量读取，
   绝不返回前端、绝不写入日志。**

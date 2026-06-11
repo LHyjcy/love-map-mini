@@ -1,5 +1,6 @@
 // pages/map/footprint/city/index — 城市页：立体回忆相册（swiper 3D 卡片）。
 const api = require('../../../../utils/api.js')
+const { thumbUrl } = require('../../../../utils/image.js')
 
 // 心情 → emoji（占位封面 & 卡片角标用）
 const MOOD_EMOJI = {
@@ -44,6 +45,8 @@ Page({
           : []
         return Object.assign({}, m, {
           photos,
+          // 卡片封面用缩略图；photos 保留原图供预览
+          cover: m.cover ? thumbUrl(m.cover) : m.cover,
           tagList: tags,
           photoCount: photos.length,
           moodEmoji: moodEmoji(m.mood),
@@ -74,7 +77,8 @@ Page({
     const ds = e.currentTarget.dataset
     const urls = ds.photos || []
     if (!urls.length) return
-    wx.previewImage({ urls, current: ds.cover || urls[0] })
+    // current 必须是 urls 里的原图地址（cover 已是缩略图，不能用）
+    wx.previewImage({ urls, current: urls[0] })
   },
 
   goPlace(e) { wx.navigateTo({ url: '/pages/placeDetail/placeDetail?id=' + e.currentTarget.dataset.id }) },

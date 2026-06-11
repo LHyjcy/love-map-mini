@@ -1,6 +1,7 @@
 // pages/map/real/index — 真实地图：原生 map 组件 + 聚合 marker + 底部卡片。
 // marker 来源 /api/map/markers（地点/回忆/本人打卡）。点击 marker 弹底部卡片。
 const api = require('../../../utils/api.js')
+const { thumbUrl } = require('../../../utils/image.js')
 
 const KIND_LABEL = { place: '地点', memory: '回忆', checkin: '打卡' }
 
@@ -113,7 +114,8 @@ Page({
       if (memories.length > 0) {
         const latest = memories[0]
         const media = (latest && latest.media) || []
-        card.cover = (media[0] && media[0].fileUrl) || ''
+        // 底部卡片封面用缩略图省流量；photos 保留原图
+        card.cover = (media[0] && media[0].fileUrl) ? thumbUrl(media[0].fileUrl) : ''
         card.photos = media.map((x) => x && x.fileUrl).filter(Boolean)
         card.memTitle = latest.title || ''
         card.memText = latest.content || ''

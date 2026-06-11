@@ -31,10 +31,10 @@
    - `socket` 合法域名：后端 wss 域名（位置共享 WebSocket）。
 3. **后端生产部署**
    - HTTPS 域名 + 常驻进程（用 `ecosystem.config.cjs` / `Dockerfile` + `deploy/nginx.conf.sample`）。
-   - 生产 MySQL；`cd apps/api && npx prisma migrate deploy`；定期备份。
+   - 生产 MySQL；`cd apps/api && npx prisma migrate deploy`；定期备份（`scripts/backup.sh` 挂 cron）。
    - `JWT_SECRET` 换强随机；`NODE_ENV=production`（自动禁用 mock 登录）。
    - 服务器域名 **ICP 备案**。
-4. **对象存储（照片）**：建 COS/OSS 桶 + 填 `STORAGE_*` 密钥 + 桶 CORS（允许小程序 PUT）；跑 `node --env-file=apps/api/.env scripts/verify-cos.mjs` 验证。**不配则照片功能不可用。**
+4. **照片存储二选一**：私用推荐 `STORAGE_PROVIDER=disk`（照片落服务器磁盘，免 COS，compose 已挂持久卷）；公开上架建议 COS/OSS（建桶 + `STORAGE_*` 密钥 + 桶 CORS，跑 `node --env-file=apps/api/.env scripts/verify-cos.mjs` 验证）。两者都不配则照片功能不可用。
 5. **小程序内 baseUrl**：`app.js` 的 `globalData.baseUrl` 改生产 HTTPS。
 
 ### 🟠 审核硬要求（合规）
@@ -54,7 +54,7 @@
 
 ### ⚪ 技术债（不阻塞）
 
-15. 线上库历史缺约 25 个外键（早期 drift，功能无碍，建议补 schema 一致性）。
+15. ~~线上库历史缺约 25 个外键~~ ✅ 已修复：孤儿数据检查后用 `prisma db execute` 补齐全部 26 条外键，`migrate diff` 已清零（新部署走 `migrate deploy` 本就含外键，不受影响）。
 16. adcode 字典非全量地级市（个别城市不点亮）；`packages/shared` 未被使用；监控/告警缺失。
 
 ---

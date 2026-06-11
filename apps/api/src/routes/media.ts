@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { config } from '../config.js';
 import { prisma } from '../db.js';
 import { diskFilePath } from '../services/storage.js';
+import { removeThumb } from '../services/thumbnails.js';
 import { requireActiveCouple } from '../utils/couple.js';
 import { AppError } from '../utils/errors.js';
 import { success } from '../utils/response.js';
@@ -109,6 +110,8 @@ export async function mediaRoutes(app: FastifyInstance): Promise<void> {
           // 文件可能已不存在或暂不可删，忽略
         }
       }
+      // 缩略图一并清理
+      await removeThumb(media.objectKey);
     }
 
     return success({ id });

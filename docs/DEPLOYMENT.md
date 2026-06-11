@@ -250,7 +250,10 @@ URL 后直传，密钥仅在服务端 env，绝不下发也绝不提交仓库。
    - 可选 `STORAGE_DISK_DIR`（默认 `uploads`）
 2. 上传走本服务 `PUT /api/media/upload?key&exp&sig`（HMAC 短时签名，10 分钟），读取走
    `GET /files/<objectKey>`（已删除照片 404；`Cache-Control: private`）。
+   列表/卡片场景走 `GET /thumbs/<objectKey>` 缩略图（640px JPEG，sharp 生成；上传后预生成、
+   历史照片惰性补齐，存于 `<STORAGE_DISK_DIR>/.thumbs/`，可随时由原图重建）。
 3. **持久化与备份**：docker-compose 已把 `/app/uploads` 挂到 `api_uploads` 卷，容器重建照片不丢；
+   每日备份用 `scripts/backup.sh`（数据库 + 照片，cron 用法见 `docs/SERVER_SETUP.md`「日常运维」）；
    裸机部署请定期备份 `STORAGE_DISK_DIR` 目录。
 4. 小程序 `uploadFile`/`request` 合法域名需包含 API 自身域名（disk 模式下图片上传/读取都走它）。
 

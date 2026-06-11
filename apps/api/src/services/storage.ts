@@ -193,6 +193,17 @@ export function diskFilePath(objectKey: string): string | null {
   return target;
 }
 
+/**
+ * 缩略图的磁盘绝对路径（根目录下 `.thumbs/` 前缀，与原图 objectKey 同名）。
+ * 同样防目录穿越：必须落在 `.thumbs/` 内。
+ */
+export function diskThumbPath(objectKey: string): string | null {
+  const thumbRoot = path.resolve(diskRootDir(), '.thumbs');
+  const target = path.resolve(thumbRoot, objectKey);
+  if (target === thumbRoot || !target.startsWith(thumbRoot + path.sep)) return null;
+  return target;
+}
+
 /** 由文件名扩展名推断 Content-Type（静态返回用）。 */
 export function contentTypeForKey(objectKey: string): string {
   const ext = objectKey.split('.').pop()?.toLowerCase() ?? '';

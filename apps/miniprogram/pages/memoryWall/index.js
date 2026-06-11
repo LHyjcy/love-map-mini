@@ -1,5 +1,6 @@
 // pages/memoryWall/index — 回忆墙：情侣全部回忆的立体感照片卡片画廊（swiper 3D 卡片）。
 const api = require('../../utils/api.js')
+const { thumbUrl } = require('../../utils/image.js')
 
 // 心情 → emoji（占位封面 & 卡片角标用）
 const MOOD_EMOJI = {
@@ -51,7 +52,8 @@ Page({
       title: m.title,
       content: m.content,
       mood: m.mood,
-      cover: photos[0] || null,
+      // 卡片封面用缩略图省流量；photos 保留原图供 wx.previewImage 看大图
+      cover: photos[0] ? thumbUrl(photos[0]) : null,
       photos,
       photoCount: photos.length,
       tagList,
@@ -124,7 +126,8 @@ Page({
     const ds = e.currentTarget.dataset
     const urls = ds.photos || []
     if (!urls.length) return
-    wx.previewImage({ urls, current: ds.cover || urls[0] })
+    // current 必须是 urls 里的原图地址（cover 已是缩略图，不能用）
+    wx.previewImage({ urls, current: urls[0] })
   },
 
   goDetail(e) {

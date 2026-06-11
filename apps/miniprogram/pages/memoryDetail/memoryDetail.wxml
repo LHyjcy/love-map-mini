@@ -53,7 +53,7 @@
           wx:for="{{media}}"
           wx:key="id"
           class="photo {{index === 0 ? 'photo-lead' : ''}}"
-          src="{{item.fileUrl}}"
+          src="{{item.thumb}}"
           mode="aspectFill"
           bindtap="previewImage"
           data-url="{{item.fileUrl}}"
